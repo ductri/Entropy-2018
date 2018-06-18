@@ -1,0 +1,12 @@
+14:57 17-06-2018
+- Download dataset
+- Reading final round's description
+- Considering IDE: juputer notebook or pycharm --> pycharm, because suggestion is the best way for coding fast.
+- Data descriptions: 
++ 3 files, negative, neutral and positive. Each csv file contains 1 column. Each row is a sentence, especially, sentences may be in accented or not. 
++ Each row is just a sentence: need to confirm, that mean, it contains almost 1 dot. And thus, the input will not be too long. Anw, we need a statistic here: sentence long.
++ About accent: A simple idea is remove all accents. More complicated one is predict accents and fill out them to non-accented sentences.
++ According to the problem description in pdf file, there are approximately 150k sentences for all classes, 44.1 MB in size, not so much
++ In addition, organizer also provides list of stop words in vietnamese. 
+- Merge 3 files into one
+- Export some statistics to have some intuition at data.
