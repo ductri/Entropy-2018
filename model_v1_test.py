@@ -12,7 +12,7 @@ class ModelV1Test(unittest.TestCase):
         batch_size = 512
         with tf.Graph().as_default():
             tf_input = tf.placeholder(dtype=tf.int32, shape=[batch_size, model_v1.SENTENCE_LENGTH_MAX])
-            tf_output = model_v1.project_words(tf_input)
+            tf_output = model_v1.__project_words(tf_input)
             with tf.Session() as sess:
                 initializer = tf.global_variables_initializer()
                 sess.run(initializer)
@@ -24,7 +24,7 @@ class ModelV1Test(unittest.TestCase):
         batch_size = 512
         with tf.Graph().as_default():
             tf_input = tf.placeholder(dtype=tf.float32, shape=[batch_size, 10, 11, 1])
-            tf_output = model_v1.conv(tf_input, kernel_size=5, number_filters=100, stride=2, name=0)
+            tf_output = model_v1.__conv(tf_input, kernel_filter_size=5, number_filters=100, stride=2, name=0)
             with tf.Session() as sess:
                 initializer = tf.global_variables_initializer()
                 sess.run(initializer)

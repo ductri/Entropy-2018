@@ -18,4 +18,19 @@
 - Data training is quite balance between 3 labels
 - TODO: do preprocesses
 - TODO: split data to do validation
-- 
+
+00:03 20-06-2018
+- Coding skeleton: model_v1.py
+
+- Preprocess
+- Build vocabulary + OUT_OF_SCOPE
+- Get one-hot index vector
+- Build graph, start with a Placeholder in Max Length of a Sentence dimension, followed by transforming matrix, end with 3 nodes
+
+--> Let's build graph first
+
+Step 1: Coding skeleton
+Aim to have a runnable version as soon as possible
+- TODO Need summary log
+- TODO Need data to feed --> preprocess data
+- TODO [Maybe next step] Need summary performance on training and evaluation set

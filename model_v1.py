@@ -9,9 +9,10 @@ SENTENCE_LENGTH_MAX = 100
 
 DEFAULT_TYPE = tf.float32
 DEFAULT_INITIALIZER = tf.truncated_normal_initializer(stddev=5e-2)
+ZERO_INITIALIZER = tf.zeros_initializer()
 
 
-def project_words(batch_sentences):
+def __project_words(batch_sentences):
     """
 
     :param batch_sentences: [batch_size, sentence_length_max]
@@ -33,13 +34,15 @@ def project_words(batch_sentences):
     return projected_words
 
 
-def conv(tensor_input, kernel_size, number_filters, stride, name=0):
+def __conv(tensor_input, kernel_filter_size, kernel_pooling_size, number_filters, stride, dropout=0.3, name=0):
     """
 
     :param tensor_input: [batch_size, height, width, channels]
-    :param kernel_size:
+    :param kernel_filter_size:
+    :param kernel_pooling_size:
     :param number_filters:
     :param stride:
+    :param dropout:
     :param name:
     :return:
     """
@@ -47,15 +50,28 @@ def conv(tensor_input, kernel_size, number_filters, stride, name=0):
     assert len(tensor_input.shape) == 4, len(tensor_input.shape)
     with tf.variable_scope('convolution_layer_{}'.format(name)):
         tf_filters = tf.get_variable(name='kernel',
-                                     shape=(kernel_size, kernel_size, tensor_input.shape[3], number_filters),
+                                     shape=(kernel_filter_size, kernel_filter_size, tensor_input.shape[3], number_filters),
                                      dtype=DEFAULT_TYPE, initializer=DEFAULT_INITIALIZER)
-        tf_output = tf.nn.conv2d(tensor_input, tf_filters, strides=[1, stride, stride, 1], padding='VALID')
+        tf_output = tf.nn.conv2d(tensor_input, tf_filters, strides=[1, stride, stride, 1], padding='SAME')
+
+        tf_bias = tf.get_variable(name='bias',
+                                  shape=[number_filters],
+                                  dtype=DEFAULT_INITIALIZER,
+                                  initializer=ZERO_INITIALIZER)
+        tf_output = tf.nn.bias_add(tf_output, tf_bias)
+
+        tf_output = tf.nn.relu(tf_output)
+
+        tf_output = tf.nn.max_pool(tf_output, ksize=[1, kernel_pooling_size, kernel_pooling_size, 1], strides=[1, 1, 1, 1], padding='VALID')
+
+        tf_output = tf.nn.dropout(tf_output, keep_prob=1-dropout)
+
     assert tf_output.shape[0] == tensor_input.shape[0]
     assert tf_output.shape[3] == number_filters
     return tf_output
 
 
-def fc(tensor_input, size, name=0):
+def __fc(tensor_input, size, name=0):
     assert len(tensor_input.shape) == 2, len(tensor_input.shape)
     with tf.variable_scope('fully_connected_layer_{}'.format(name)):
         tf_weights = tf.get_variable(name='weights',
@@ -63,11 +79,15 @@ def fc(tensor_input, size, name=0):
                                      dtype=DEFAULT_TYPE,
                                      initializer=DEFAULT_INITIALIZER)
         tf_output = tf.matmul(tensor_input, tf_weights)
+
+        tf_bias = tf.get_variable(name='bias', shape=[size], dtype=DEFAULT_TYPE, initializer=ZERO_INITIALIZER)
+        tf_output = tf.nn.bias_add(tf_output, tf_bias)
+
     assert tf_output.shape[1] == size, tf_output.shape[1]
     return tf_output
 
 
-def squash_to_output(tensor_input, output_size, name=0):
+def __squash_to_output(tensor_input, name=0):
     with tf.variable_scope('squash_layer_{}'.format(name)):
         tf_output = tf.nn.softmax(tensor_input)
     return tf_output
@@ -79,36 +99,40 @@ def inference(batch_sentences):
     :param batch_sentences: [batch_size, sentence_length_max]
     :return:
     """
-    projected_input = project_words(batch_sentences)
+    projected_input = __project_words(batch_sentences)
     projected_input = tf.reshape(tensor=projected_input, shape=list(projected_input.shape) + [1])
 
-    after_conv = conv(projected_input, kernel_size=5, number_filters=100, stride=2, name=0)
+    after_conv = __conv(projected_input, kernel_filter_size=5, number_filters=100, stride=2, name=0)
     print('After conv 0: ', after_conv.shape)
 
-    after_conv = conv(after_conv, kernel_size=5, number_filters=100, stride=2, name=1)
+    after_conv = __conv(after_conv, kernel_filter_size=5, number_filters=100, stride=2, name=1)
     print('After conv 1: ', after_conv.shape)
 
     flatten = tf.reshape(after_conv, [-1, after_conv.shape[1] * after_conv.shape[2] * after_conv.shape[3]])
     print('After flatt: ', flatten.shape)
 
-    after_fc = fc(flatten, 100, name=0)
+    after_fc = __fc(flatten, 100, name=0)
     print('After fc 0: ', after_fc.shape)
+
+    after_fc = __fc(after_fc, 3, name=0)
+    print('After fc 1: ', after_fc.shape)
 
     return after_fc
 
 
-def loss(batch_sentences, batch_labels):
+def loss(tf_logits, batch_labels):
     """
 
-    :param batch_sentences:
+    :param tf_logits: [X, number_classes]
     :param batch_labels: [batch_size]
     :return:
     """
-    tf_inference = inference(batch_sentences)
-    assert len(tf_inference.shape) == 2, len(tf_inference.shape)
-    tf_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=batch_labels, logits=tf_inference)
+    assert len(tf_logits.shape) == 2, len(tf_logits.shape)
+    tf_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=batch_labels, logits=tf_logits)
     return tf_loss
 
 
 def optimize(tf_loss):
-    pass
+    optimizer = tf.train.AdagradOptimizer(learning_rate=0.05)
+    optimizer_op = optimizer.minimize(tf_loss)
+    return optimizer_op
