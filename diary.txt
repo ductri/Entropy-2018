@@ -10,3 +10,12 @@
 + In addition, organizer also provides list of stop words in vietnamese. 
 - Merge 3 files into one
 - Export some statistics to have some intuition at data.
+
+16:56 18-06-2018
+- Do data description
+- TODO: remove too long mention, maybe 1000 as threshold
+- Lengh of negative is the longest one, and twice longer than neutral ?
+- Data training is quite balance between 3 labels
+- TODO: do preprocesses
+- TODO: split data to do validation
+- 
