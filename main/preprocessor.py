@@ -1,0 +1,119 @@
+import pandas as pd
+import re
+from pyvi import ViTokenizer
+import collections
+import itertools
+
+
+def replace_url(list_docs):
+    def clear_url_text(text):
+        URL_PATTERN = re.compile(
+            r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?\xab\xbb\u201c\u201d\u2018\u2019]))')
+        return re.sub(URL_PATTERN, 'URL', text)
+
+    return [clear_url_text(doc) for doc in list_docs]
+
+
+def clear_number(list_docs):
+    def clear_number_text(text):
+        NUMBERS_PATTERN = re.compile(r"[+-]?\d+(?:\.\d+)?")
+        return re.sub(NUMBERS_PATTERN, '', text)
+
+    return [clear_number_text(doc) for doc in list_docs]
+
+
+def extract_and_remove_hashtag_df(df, output_file):
+    def extract_and_remove_hashtag_text(text):
+        HASHTAG_PATTERN = re.compile(r'# \w+')
+        list_hashtags = re.findall(HASHTAG_PATTERN, text)
+        new_text = re.sub(HASHTAG_PATTERN, '', text)
+        return new_text, list_hashtags
+
+    list_new_text = []
+    list_hashtags = []
+    for text in list(df['text']):
+        new_text, tags = extract_and_remove_hashtag_text(text)
+        list_new_text.append(new_text)
+        list_hashtags.extend(tags)
+    df['text'] = list_new_text
+    pd.DataFrame({'hashtag': list_hashtags}).to_csv(output_file, index=None)
+    return df
+
+
+def get_most_popular_hashtag(n=10):
+    list_hashtags = list(pd.read_csv('./hashtags.csv').iloc[:, 0])
+    c = collections.Counter(list_hashtags)
+    return c.most_common(n)
+
+
+class Text2Vector:
+    OUT_OF_VOCAB = 'OUT_OF_VOCAB'
+
+    def __init__(self):
+        self.counts = None
+        self.int_to_vocab = None
+        self.vocab_to_int = None
+
+    def __tokenize(self, text):
+        """
+
+        :param text:
+        :return: list
+        """
+        return ViTokenizer.tokenize(text).split(' ')
+
+    def doc_to_vec(self, list_documents):
+        assert isinstance(list_documents, list)
+        tokenized_documents = [self.__tokenize(doc) for doc in list_documents]
+        return [self.__transform(doc) for doc in tokenized_documents]
+
+    def vec_to_doc(self, list_vecs):
+        assert isinstance(list_vecs, list)
+        return [self.__invert_transform(vec) for vec in list_vecs]
+
+    def fit(self, list_texts):
+        if self.counts or self.vocab_to_int or self.int_to_vocab:
+            raise Exception('"fit" is a one-time function')
+
+        list_tokenized_texts = [self.__tokenize(text) for text in list_texts]
+        all_tokens = itertools.chain(*list_tokenized_texts)
+        self.counts = collections.Counter(all_tokens)
+
+        self.int_to_vocab = self.__get_vocab()
+        self.int_to_vocab += [Text2Vector.OUT_OF_VOCAB]
+        self.vocab_to_int = {word: index for index, word in enumerate(self.int_to_vocab)}
+
+    def __transform(self, list_tokens):
+        if not self.vocab_to_int:
+            raise Exception('vocab_to_int is None')
+
+        return [self.vocab_to_int[token] if token in self.vocab_to_int else self.vocab_to_int[Text2Vector.OUT_OF_VOCAB] for token in list_tokens]
+
+    def __invert_transform(self, list_ints):
+        """
+
+        :param list_ints:
+        :return: A document str
+        """
+        if not self.int_to_vocab:
+            raise Exception('vocab_to_int is None')
+
+        return ' '.join([self.int_to_vocab[int_item] for int_item in list_ints])
+
+    def __get_vocab(self, vocab_size=10000):
+        if not self.counts:
+            raise Exception('counts is None')
+        return [item[0] for item in self.counts.most_common(n=vocab_size)]
+
+    def get_most_common(self, n=10):
+        if not self.counts:
+            raise Exception('counts is None')
+        return self.counts.most_common(n)
+
+
+def preprocess(list_docs):
+    preprocessed_docs = clear_number(list_docs)
+    preprocessed_docs = replace_url(preprocessed_docs)
+    preprocessed_docs = [doc.lower() for doc in preprocessed_docs]
+    return preprocessed_docs
+

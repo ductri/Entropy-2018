@@ -16,8 +16,8 @@
 - TODO: remove too long mention, maybe 1000 as threshold
 - Lengh of negative is the longest one, and twice longer than neutral ?
 - Data training is quite balance between 3 labels
-- TODO: do preprocesses
-- TODO: split data to do validation
+- do preprocesses
+- split data to do validation
 
 00:03 20-06-2018
 - Coding skeleton: model_v1.py
@@ -31,7 +31,7 @@
 
 Step 1: Coding skeleton
 Aim to have a runnable version as soon as possible
-- TODO Need summary log
+- Need summary log
 - TODO Need data to feed --> preprocess data
 - TODO [Maybe next step] Need summary performance on training and evaluation set
 11:16 20-06-2018
@@ -42,4 +42,11 @@ Boost the mood successfully
 
 - Continue to adding summary ops
 - Max Ram. Damm! Always remeber to limit resource before run, even dummy test.
-
+- Ok, a simple code is on the board now.
+- Let's move to text preprocessing, tedious works :33 
+- This is the first try, try it as simple as possible to quickly have a prototype:
++ reuse code from previous round
++ What proportion of sentences without accents ? Not much. TODO consider remove/add accents
++ TODO: it's severe, vietnamese tokenizer doesn't work with non-accent sentences
+- ref: https://towardsdatascience.com/training-and-visualising-word-vectors-2f946c6430f8
+- ref: http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-1-introduction-to-rnns/
