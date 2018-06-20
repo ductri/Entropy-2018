@@ -34,3 +34,10 @@ Aim to have a runnable version as soon as possible
 - TODO Need summary log
 - TODO Need data to feed --> preprocess data
 - TODO [Maybe next step] Need summary performance on training and evaluation set
+11:16 20-06-2018
+- Adding summary ops
+
+19:18 20-06-2018
+Boost the mood successfully
+
+- Continue to adding summary ops
