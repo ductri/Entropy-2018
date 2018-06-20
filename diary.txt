@@ -41,3 +41,5 @@ Aim to have a runnable version as soon as possible
 Boost the mood successfully
 
 - Continue to adding summary ops
+- Max Ram. Damm! Always remeber to limit resource before run, even dummy test.
+

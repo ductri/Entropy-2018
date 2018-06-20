@@ -3,14 +3,16 @@
 import tensorflow as tf
 
 
-EMBEDDING_SIZE = 200
-VOCAB_SIZE = 10000
-SENTENCE_LENGTH_MAX = 100
+EMBEDDING_SIZE = 20
+VOCAB_SIZE = 1000
+SENTENCE_LENGTH_MAX = 10
 
 DEFAULT_TYPE = tf.float32
 
+
 def DEFAULT_INITIALIZER():
     return tf.truncated_normal_initializer(stddev=5e-2)
+
 
 def ZERO_INITIALIZER():
     return tf.zeros_initializer()

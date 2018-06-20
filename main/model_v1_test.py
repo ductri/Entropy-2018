@@ -2,8 +2,7 @@ import tensorflow as tf
 import unittest
 import numpy as np
 
-import model_v1
-import utils
+from main import utils, model_v1
 
 
 class ModelV1Test(unittest.TestCase):
