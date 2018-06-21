@@ -3,6 +3,7 @@ import re
 from pyvi import ViTokenizer
 import collections
 import itertools
+import numpy as np
 
 
 def replace_url(list_docs):
@@ -48,6 +49,7 @@ def get_most_popular_hashtag(n=10):
 
 class Text2Vector:
     OUT_OF_VOCAB = 'OUT_OF_VOCAB'
+    PADDING = 'PADDING'
 
     def __init__(self):
         self.counts = None
@@ -80,7 +82,7 @@ class Text2Vector:
         self.counts = collections.Counter(all_tokens)
 
         self.int_to_vocab = self.__get_vocab()
-        self.int_to_vocab += [Text2Vector.OUT_OF_VOCAB]
+        self.int_to_vocab = [Text2Vector.PADDING] + self.int_to_vocab + [Text2Vector.OUT_OF_VOCAB]
         self.vocab_to_int = {word: index for index, word in enumerate(self.int_to_vocab)}
 
     def __transform(self, list_tokens):

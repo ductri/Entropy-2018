@@ -50,3 +50,4 @@ Boost the mood successfully
 + TODO: it's severe, vietnamese tokenizer doesn't work with non-accent sentences
 - ref: https://towardsdatascience.com/training-and-visualising-word-vectors-2f946c6430f8
 - ref: http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-1-introduction-to-rnns/
+TODO strategies for cutting too much long sentence: cut the tail, cut the head, random cut then get avg

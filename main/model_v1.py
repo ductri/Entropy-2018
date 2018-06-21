@@ -1,5 +1,5 @@
 # Started at 11:30 19-06-2018
-
+import logging
 import tensorflow as tf
 
 
@@ -109,19 +109,19 @@ def inference(batch_sentences):
     projected_input = tf.reshape(tensor=projected_input, shape=list(projected_input.shape) + [1])
 
     after_conv = __conv(projected_input, kernel_filter_size=5, kernel_pooling_size=2, number_filters=100, stride=2, name=0)
-    print('After conv 0: ', after_conv.shape)
+    logging.info('After conv 0: ', after_conv.shape)
 
     after_conv = __conv(after_conv, kernel_filter_size=5, kernel_pooling_size=2, number_filters=100, stride=2, name=1)
-    print('After conv 1: ', after_conv.shape)
+    logging.info('After conv 1: ', after_conv.shape)
 
     flatten = tf.reshape(after_conv, [-1, after_conv.shape[1] * after_conv.shape[2] * after_conv.shape[3]])
-    print('After flatt: ', flatten.shape)
+    logging.info('After flatt: ', flatten.shape)
 
     after_fc = __fc(flatten, 100, name=0)
-    print('After fc 0: ', after_fc.shape)
+    logging.info('After fc 0: ', after_fc.shape)
 
     after_fc = __fc(after_fc, 3, name=1)
-    print('After fc 1: ', after_fc.shape)
+    logging.info('After fc 1: ', after_fc.shape)
 
     return after_fc
 
