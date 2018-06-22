@@ -1,7 +1,7 @@
 import unittest
 
-from main.preprocessor import Text2Vector
-from main import preprocessor
+from preprocessor import Text2Vector
+import preprocessor
 
 
 class Text2VectorTest(unittest.TestCase):

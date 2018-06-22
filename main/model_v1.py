@@ -3,11 +3,12 @@ import logging
 import tensorflow as tf
 
 
-EMBEDDING_SIZE = 20
-VOCAB_SIZE = 1000
-SENTENCE_LENGTH_MAX = 10
+VOCAB_SIZE = 10002
+SENTENCE_LENGTH_MAX = 150
 
 DEFAULT_TYPE = tf.float32
+
+FLAGS = tf.flags.FLAGS
 
 
 def DEFAULT_INITIALIZER():
@@ -28,14 +29,14 @@ def __project_words(batch_sentences):
     assert batch_sentences.shape[1] == SENTENCE_LENGTH_MAX
 
     with tf.variable_scope('embedding'):
-        word_embeddings = tf.get_variable(name='word_embeddings', dtype=DEFAULT_TYPE, shape=[VOCAB_SIZE, EMBEDDING_SIZE],
+        word_embeddings = tf.get_variable(name='word_embeddings', dtype=DEFAULT_TYPE, shape=[VOCAB_SIZE, FLAGS.EMBEDDING_SIZE],
                                           initializer=DEFAULT_INITIALIZER())
         projected_words = tf.nn.embedding_lookup(params=word_embeddings, ids=batch_sentences)
 
     assert len(projected_words.shape) == 3
-    assert projected_words.shape[0] == batch_sentences.shape[0]
+
     assert projected_words.shape[1] == SENTENCE_LENGTH_MAX
-    assert projected_words.shape[2] == EMBEDDING_SIZE
+    assert projected_words.shape[2] == FLAGS.EMBEDDING_SIZE
 
     return projected_words
 
@@ -72,7 +73,6 @@ def __conv(tensor_input, kernel_filter_size, kernel_pooling_size, number_filters
 
         tf_output = tf.nn.dropout(tf_output, keep_prob=1-dropout)
 
-    assert tf_output.shape[0] == tensor_input.shape[0]
     assert tf_output.shape[3] == number_filters
     return tf_output
 
@@ -106,22 +106,22 @@ def inference(batch_sentences):
     :return: logits
     """
     projected_input = __project_words(batch_sentences)
-    projected_input = tf.reshape(tensor=projected_input, shape=list(projected_input.shape) + [1])
+    projected_input = tf.reshape(tensor=projected_input, shape=[-1] + list(projected_input.shape[1:]) + [1])
 
-    after_conv = __conv(projected_input, kernel_filter_size=5, kernel_pooling_size=2, number_filters=100, stride=2, name=0)
-    logging.info('After conv 0: ', after_conv.shape)
+    after_conv = __conv(projected_input, kernel_filter_size=5, kernel_pooling_size=2, number_filters=10, stride=2, name=0)
+    logging.info('After conv 0: %s', after_conv.shape)
 
-    after_conv = __conv(after_conv, kernel_filter_size=5, kernel_pooling_size=2, number_filters=100, stride=2, name=1)
-    logging.info('After conv 1: ', after_conv.shape)
+    after_conv = __conv(after_conv, kernel_filter_size=5, kernel_pooling_size=2, number_filters=10, stride=2, name=1)
+    logging.info('After conv 1: %s', after_conv.shape)
 
     flatten = tf.reshape(after_conv, [-1, after_conv.shape[1] * after_conv.shape[2] * after_conv.shape[3]])
-    logging.info('After flatt: ', flatten.shape)
+    logging.info('After flatt: %s', flatten.shape)
 
     after_fc = __fc(flatten, 100, name=0)
-    logging.info('After fc 0: ', after_fc.shape)
+    logging.info('After fc 0: %s', after_fc.shape)
 
     after_fc = __fc(after_fc, 3, name=1)
-    logging.info('After fc 1: ', after_fc.shape)
+    logging.info('After fc 1: %s', after_fc.shape)
 
     return after_fc
 
@@ -148,25 +148,24 @@ def optimize(tf_loss):
     return optimizer, tf_global_step
 
 
-def predict(batch_sentences):
+def predict(tf_logits):
     """
 
     :param batch_sentences: [batch_size, sentence_length_max]
     :return:
     """
-    tf_logits = inference(batch_sentences)
-    tf_predicts = tf.argmax(tf_logits, axis=1)
+    tf_predicts = tf.argmax(tf_logits, axis=1, output_type=tf.int32)
     return tf_predicts
 
 
-def measure_acc(batch_sentences, batch_labels):
+def measure_acc(tf_logits, batch_labels):
     """
 
     :param batch_sentences: [batch_size, sentence_length_max]
     :param batch_labels: [batch_size]
     :return:
     """
-    tf_predicts = predict(batch_sentences)
-    tf_acc = tf.reduce_mean(tf.cast(tf.equal(tf_predicts, batch_sentences), 'float'))
+    tf_predicts = predict(tf_logits)
+    tf_acc = tf.reduce_mean(tf.cast(tf.equal(tf_predicts, batch_labels), 'float'))
     tf.summary.scalar(name='accuracy', tensor=tf_acc)
     return tf_acc

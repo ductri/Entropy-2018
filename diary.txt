@@ -51,3 +51,11 @@ Boost the mood successfully
 - ref: https://towardsdatascience.com/training-and-visualising-word-vectors-2f946c6430f8
 - ref: http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-1-introduction-to-rnns/
 TODO strategies for cutting too much long sentence: cut the tail, cut the head, random cut then get avg
+10:44 21-06-2018
+- Continue with data manager: loading from files, batching, preprocessing, dumping, ... tired.
+19:50 22-06-2018
+- TODO replace URL stupid
+12:48 22-06-2018
+- Haven't run so far, start to be stressed :(
+- Straggle with RAM limit. WTH, always end after 470 steps ???
+- Adjusting params to fit RAM. Fine. Let it go

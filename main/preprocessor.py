@@ -1,9 +1,14 @@
 import pandas as pd
 import re
-from pyvi import ViTokenizer
+from nltk.tokenize import word_tokenize
 import collections
 import itertools
 import numpy as np
+import logging
+import nltk
+
+
+nltk.download('punkt')
 
 
 def replace_url(list_docs):
@@ -62,18 +67,26 @@ class Text2Vector:
         :param text:
         :return: list
         """
-        return ViTokenizer.tokenize(text).split(' ')
+        return word_tokenize(text)
 
     def doc_to_vec(self, list_documents):
+        logging.info('-- From doc_to_vec')
         assert isinstance(list_documents, list)
-        tokenized_documents = [self.__tokenize(doc) for doc in list_documents]
+        len_list = len(list_documents)
+        tokenized_documents = []
+        for i, doc in enumerate(list_documents):
+            if i % 100 == 0:
+                logging.info('--- Tokenizing: {}\{}, len={}'.format(i, len_list, len(doc)))
+            tokenized_documents.append(self.__tokenize(doc))
+
         return [self.__transform(doc) for doc in tokenized_documents]
 
     def vec_to_doc(self, list_vecs):
-        assert isinstance(list_vecs, list)
+        assert isinstance(list_vecs, list) or isinstance(list_vecs, np.ndarray)
         return [self.__invert_transform(vec) for vec in list_vecs]
 
     def fit(self, list_texts):
+        logging.info('-- From fit')
         if self.counts or self.vocab_to_int or self.int_to_vocab:
             raise Exception('"fit" is a one-time function')
 
@@ -119,3 +132,7 @@ def preprocess(list_docs):
     preprocessed_docs = [doc.lower() for doc in preprocessed_docs]
     return preprocessed_docs
 
+
+if __name__ == '__main__':
+    docs = ['tuổi trẻ online tuoitre.vn']
+    print(replace_url(docs))

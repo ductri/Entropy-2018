@@ -2,48 +2,90 @@ import tensorflow as tf
 import numpy as np
 import os
 import time
+import logging.config
+from ruamel.yaml import YAML
 
-from main import model_v1
-
-BATCH_SIZE = 512
+import model_v1
+from dataset_manager import DatasetManager
 
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
+tf.flags.DEFINE_string('ALL_DATASET', '/home/ductri/code/all_dataset/', 'path to all dataset')
+tf.flags.DEFINE_integer('BATCH_SIZE', 64, 'batch size')
+tf.flags.DEFINE_integer('NUMBER_EPOCHS', 1, 'number of epochs size')
+tf.flags.DEFINE_integer('TEST_SIZE', 1000, 'test size')
+tf.flags.DEFINE_integer('EMBEDDING_SIZE', 200, 'embedding size')
+
+FLAGS = tf.flags.FLAGS
+
+
 def run(name):
     with tf.Graph().as_default() as gr:
-        tf_input = tf.placeholder(dtype=tf.int32, shape=[BATCH_SIZE, model_v1.SENTENCE_LENGTH_MAX])
-        tf_labels = tf.placeholder(dtype=tf.int32, shape=[BATCH_SIZE])
+        tf_input = tf.placeholder(dtype=tf.int32, shape=[None, model_v1.SENTENCE_LENGTH_MAX])
+        tf_labels = tf.placeholder(dtype=tf.int32, shape=[None])
 
-        tf_inference = model_v1.inference(tf_input)
-        tf_loss = model_v1.loss(tf_inference, tf_labels)
+        tf_logits = model_v1.inference(tf_input)
+        tf_loss = model_v1.loss(tf_logits, tf_labels)
 
         tf_optimizer, tf_global_step = model_v1.optimize(tf_loss)
+        model_v1.measure_acc(tf_logits, tf_labels)
 
         tf_all_summary = tf.summary.merge_all()
 
-        tf_writer = tf.summary.FileWriter(logdir=os.path.join(CURRENT_DIR, 'summary', str(name), str(int(time.time()))), graph=gr)
+        now = str(int(time.time()))
+        tf_train_writer = tf.summary.FileWriter(logdir=os.path.join(CURRENT_DIR, '..', 'summary', str(name), 'train_' + now), graph=gr)
+        tf_test_writer = tf.summary.FileWriter(logdir=os.path.join(CURRENT_DIR, '..', 'summary', str(name), 'test_' + now), graph=gr)
 
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.7)
         with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)).as_default() as sess:
             sess.run(tf.global_variables_initializer())
             sess.run(tf.local_variables_initializer())
 
-            for _ in range(1000):
+            dataset_manager = DatasetManager()
+            dataset_manager.boot()
+            docs_test, labels_test = dataset_manager.get_test_set(FLAGS.TEST_SIZE)
+            for docs, labels in dataset_manager.get_batch(batch_size=FLAGS.BATCH_SIZE, number_epochs=FLAGS.NUMBER_EPOCHS):
+                # print('-- -- Debug: docs: ', docs.shape)
+                # print('-- -- Debug: sentiments: ', sentiments.shape)
                 _, global_step = sess.run([tf_optimizer, tf_global_step],
                                           feed_dict={
-                                              tf_input: np.random.randint(low=0, high=model_v1.VOCAB_SIZE, size=(BATCH_SIZE, model_v1.SENTENCE_LENGTH_MAX)),
-                                              tf_labels: np.random.randint(low=0, high=3, size=BATCH_SIZE)
+                                              tf_input: docs,
+                                              tf_labels: labels
                                           })
-                print('global step: ', global_step)
                 if global_step % 10 == 0:
-                    summary_data = sess.run(tf_all_summary, feed_dict={
-                                              tf_input: np.random.randint(low=0, high=model_v1.VOCAB_SIZE, size=(BATCH_SIZE, model_v1.SENTENCE_LENGTH_MAX)),
-                                              tf_labels: np.random.randint(low=0, high=3, size=BATCH_SIZE)
+                    print('Global step: ', global_step)
+                    train_summary_data = sess.run(tf_all_summary, feed_dict={
+                                              tf_input: docs,
+                                              tf_labels: labels
                                           })
-                    tf_writer.add_summary(summary_data, global_step=global_step)
+                    tf_train_writer.add_summary(train_summary_data, global_step=global_step)
+
+                if global_step % 10 == 0:
+                    test_summary_data = sess.run(tf_all_summary, feed_dict={
+                        tf_input: docs_test,
+                        tf_labels: labels_test
+                    })
+                    tf_test_writer.add_summary(test_summary_data, global_step=global_step)
+
+
+def main(argv=None):
+    print('*' * 50)
+    print('--- All parameters ---')
+    print(FLAGS.flag_values_dict())
+    print('--- All parameters ---')
+
+    run('test-1')
+
+
+def setup_logging():
+    yaml = YAML(typ='safe')
+    with open(os.path.join(CURRENT_DIR, 'config_logging.yaml'), 'rt') as f:
+        config = yaml.load(f.read())
+    logging.config.dictConfig(config)
 
 
 if __name__ == '__main__':
-    run('test-1')
+    setup_logging()
+    tf.app.run()
