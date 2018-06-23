@@ -59,3 +59,10 @@ TODO strategies for cutting too much long sentence: cut the tail, cut the head, 
 - Haven't run so far, start to be stressed :(
 - Straggle with RAM limit. WTH, always end after 470 steps ???
 - Adjusting params to fit RAM. Fine. Let it go
+- Should get overfitting first to confirm we're having a proper model !!! 
+--> Confirmed !
+
+- TODO create checkpoint, it is a must !!
+- TODO try this: just pre-train word embedding, then feed to a logistic regression to the a look
+- TODO extract parameters with summary name
+- TODO formally state the pipeline to get a big picture, then consider where on the pipeline should be focused

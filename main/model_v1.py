@@ -28,7 +28,7 @@ def __project_words(batch_sentences):
     assert len(batch_sentences.shape) == 2
     assert batch_sentences.shape[1] == SENTENCE_LENGTH_MAX
 
-    with tf.variable_scope('embedding'):
+    with tf.device('/cpu:0'), tf.variable_scope('embedding'):
         word_embeddings = tf.get_variable(name='word_embeddings', dtype=DEFAULT_TYPE, shape=[VOCAB_SIZE, FLAGS.EMBEDDING_SIZE],
                                           initializer=DEFAULT_INITIALIZER())
         projected_words = tf.nn.embedding_lookup(params=word_embeddings, ids=batch_sentences)

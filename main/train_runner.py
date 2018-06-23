@@ -5,8 +5,10 @@ import time
 import logging.config
 from ruamel.yaml import YAML
 
+
 import model_v1
 from dataset_manager import DatasetManager
+import utils
 
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -34,12 +36,19 @@ def run(name):
 
         tf_all_summary = tf.summary.merge_all()
 
-        now = str(int(time.time()))
-        tf_train_writer = tf.summary.FileWriter(logdir=os.path.join(CURRENT_DIR, '..', 'summary', str(name), 'train_' + now), graph=gr)
-        tf_test_writer = tf.summary.FileWriter(logdir=os.path.join(CURRENT_DIR, '..', 'summary', str(name), 'test_' + now), graph=gr)
+        now_str = str(int(time.time()))
+        tf_train_writer = tf.summary.FileWriter(logdir=os.path.join(CURRENT_DIR, '..', 'summary', str(name), 'train_' + now_str), graph=gr)
+        tf_test_writer = tf.summary.FileWriter(logdir=os.path.join(CURRENT_DIR, '..', 'summary', str(name), 'test_' + now_str), graph=gr)
 
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.7)
-        with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)).as_default() as sess:
+        saver = tf.train.Saver(max_to_keep=5)
+
+        logging.info('Graph size: %s', utils.count_trainable_variables())
+
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.95)
+        with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options,
+                                              allow_soft_placement=True,
+                                              log_device_placement=True
+                                              )).as_default() as sess:
             sess.run(tf.global_variables_initializer())
             sess.run(tf.local_variables_initializer())
 
@@ -47,15 +56,13 @@ def run(name):
             dataset_manager.boot()
             docs_test, labels_test = dataset_manager.get_test_set(FLAGS.TEST_SIZE)
             for docs, labels in dataset_manager.get_batch(batch_size=FLAGS.BATCH_SIZE, number_epochs=FLAGS.NUMBER_EPOCHS):
-                # print('-- -- Debug: docs: ', docs.shape)
-                # print('-- -- Debug: sentiments: ', sentiments.shape)
                 _, global_step = sess.run([tf_optimizer, tf_global_step],
                                           feed_dict={
                                               tf_input: docs,
                                               tf_labels: labels
                                           })
                 if global_step % 10 == 0:
-                    print('Global step: ', global_step)
+                    logging.debug('Global step: %s', global_step)
                     train_summary_data = sess.run(tf_all_summary, feed_dict={
                                               tf_input: docs,
                                               tf_labels: labels
@@ -69,14 +76,22 @@ def run(name):
                     })
                     tf_test_writer.add_summary(test_summary_data, global_step=global_step)
 
+                if global_step % 200 == 0:
+                    path_to_save = os.path.join(CURRENT_DIR, '..', 'checkpoint', str(name), now_str)
+                    if not os.path.exists(path_to_save):
+                        os.makedirs(path_to_save)
+                    saved_file = saver.save(sess, save_path=path_to_save, global_step=global_step)
+                    logging.debug('Saving model at %s', saved_file)
+
 
 def main(argv=None):
-    print('*' * 50)
-    print('--- All parameters ---')
-    print(FLAGS.flag_values_dict())
-    print('--- All parameters ---')
+    experiment_name = 'test-1'
+    logging.info('*' * 50)
+    logging.info('--- All parameters for running experiment: %s ---', experiment_name)
+    logging.info(FLAGS.flag_values_dict())
+    logging.info('--- All parameters ---')
 
-    run('test-1')
+    run(experiment_name)
 
 
 def setup_logging():
