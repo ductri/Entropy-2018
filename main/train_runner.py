@@ -21,6 +21,21 @@ tf.flags.DEFINE_integer('NUMBER_EPOCHS', 1, 'number of epochs size')
 tf.flags.DEFINE_integer('TEST_SIZE', 1000, 'test size')
 tf.flags.DEFINE_integer('EMBEDDING_SIZE', 200, 'embedding size')
 
+tf.flags.DEFINE_integer('CONV0_KERNEL_FILTER_SIZE', 5, 'kernel filter size in conv 0')
+tf.flags.DEFINE_integer('CONV0_KERNEL_POOLING_SIZE', 2, 'kernel pooling size in conv 0')
+tf.flags.DEFINE_integer('CONV0_NUMBER_FILTERS', 10, 'number of filters in conv 0')
+tf.flags.DEFINE_float('CONV0_DROPOUT', 0.3, 'dropout rate in conv 0')
+
+tf.flags.DEFINE_integer('CONV1_KERNEL_FILTER_SIZE', 5, 'kernel filter size in conv 1')
+tf.flags.DEFINE_integer('CONV1_KERNEL_POOLING_SIZE', 2, 'kernel pooling size in conv 1')
+tf.flags.DEFINE_integer('CONV1_NUMBER_FILTERS', 10, 'number of filters in conv 1')
+tf.flags.DEFINE_float('CONV1_DROPOUT', 0.3, 'dropout rate in conv 1')
+
+tf.flags.DEFINE_integer('FC0_SIZE', 100, 'output size of fully connected layer 0')
+
+tf.flags.DEFINE_boolean('LOG_DEVICE_PLACEMENT', False, 'display which devices are using')
+
+
 FLAGS = tf.flags.FLAGS
 
 
@@ -40,14 +55,14 @@ def run(experiment_name):
         tf_train_writer = tf.summary.FileWriter(logdir=os.path.join(CURRENT_DIR, '..', 'summary', 'train_' + experiment_name), graph=gr)
         tf_test_writer = tf.summary.FileWriter(logdir=os.path.join(CURRENT_DIR, '..', 'summary', 'test_' + experiment_name), graph=gr)
 
-        saver = tf.train.Saver(max_to_keep=5)
+        saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=0.03)
 
         logging.info('Graph size: %s', utils.count_trainable_variables())
 
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.95)
         with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options,
                                               allow_soft_placement=True,
-                                              log_device_placement=True
+                                              log_device_placement=FLAGS.LOG_DEVICE_PLACEMENT
                                               )).as_default() as sess:
             sess.run(tf.global_variables_initializer())
             sess.run(tf.local_variables_initializer())
@@ -89,9 +104,11 @@ def run(experiment_name):
 def main(argv=None):
     experiment_name = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S')
     logging.info('*' * 50)
-    logging.info('--- All parameters for running experiment: %s ---', experiment_name)
-    logging.info(FLAGS.flag_values_dict())
-    logging.info('--- All parameters ---')
+    logging.info('--- All parameters for running experiment: %s', experiment_name)
+    params = FLAGS.flag_values_dict()
+    for key in params:
+        logging.info('{}: {}'.format(key, params[key]))
+    logging.info('*' * 50)
 
     run(experiment_name)
 

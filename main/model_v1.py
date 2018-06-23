@@ -108,16 +108,26 @@ def inference(batch_sentences):
     projected_input = __project_words(batch_sentences)
     projected_input = tf.reshape(tensor=projected_input, shape=[-1] + list(projected_input.shape[1:]) + [1])
 
-    after_conv = __conv(projected_input, kernel_filter_size=5, kernel_pooling_size=2, number_filters=10, stride=2, name=0)
+    after_conv = __conv(projected_input,
+                        kernel_filter_size=FLAGS.CONV0_KERNEL_FILTER_SIZE,
+                        kernel_pooling_size=FLAGS.CONV0_KERNEL_POOLING_SIZE,
+                        number_filters=FLAGS.CONV0_NUMBER_FILTERS,
+                        dropout=FLAGS.CONV0_DROPOUT,
+                        stride=2, name=0)
     logging.info('After conv 0: %s', after_conv.shape)
 
-    after_conv = __conv(after_conv, kernel_filter_size=5, kernel_pooling_size=2, number_filters=10, stride=2, name=1)
+    after_conv = __conv(after_conv,
+                        kernel_filter_size=FLAGS.CONV1_KERNEL_FILTER_SIZE,
+                        kernel_pooling_size=FLAGS.CONV1_KERNEL_POOLING_SIZE,
+                        number_filters=FLAGS.CONV1_NUMBER_FILTERS,
+                        dropout=FLAGS.CONV1_DROPOUT,
+                        stride=2, name=1)
     logging.info('After conv 1: %s', after_conv.shape)
 
     flatten = tf.reshape(after_conv, [-1, after_conv.shape[1] * after_conv.shape[2] * after_conv.shape[3]])
     logging.info('After flatt: %s', flatten.shape)
 
-    after_fc = __fc(flatten, 100, name=0)
+    after_fc = __fc(flatten, size=FLAGS.FC0_SIZE, name=0)
     logging.info('After fc 0: %s', after_fc.shape)
 
     after_fc = __fc(after_fc, 3, name=1)

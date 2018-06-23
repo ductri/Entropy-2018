@@ -48,8 +48,8 @@ Boost the mood successfully
 + reuse code from previous round
 + What proportion of sentences without accents ? Not much. TODO consider remove/add accents
 + TODO: it's severe, vietnamese tokenizer doesn't work with non-accent sentences
-- ref: https://towardsdatascience.com/training-and-visualising-word-vectors-2f946c6430f8
-- ref: http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-1-introduction-to-rnns/
+- ref[1]: https://towardsdatascience.com/training-and-visualising-word-vectors-2f946c6430f8
+- ref[2]: http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-1-introduction-to-rnns/
 TODO strategies for cutting too much long sentence: cut the tail, cut the head, random cut then get avg
 10:44 21-06-2018
 - Continue with data manager: loading from files, batching, preprocessing, dumping, ... tired.
@@ -68,4 +68,21 @@ TODO strategies for cutting too much long sentence: cut the tail, cut the head, 
 - extract parameters with summary name
 --> Done
 - TODO formally state the pipeline to get a big picture, then consider where on the pipeline should be focused
+15:00 23-06-2018
 - The skeleton has been quite strong so far
+- git tag v1.0
+- It was funny, the code would be crash with per_process_gpu_memory_fraction=0.9 but run successfully with per_process_gpu_memory_fraction=0.95
+- We are setting the test choosen randomly for each step. It deceases the performance about 80%
+17:24 23-06-2018
+TODO code predict function 
+ref[3] http://fabiorehm.com/blog/2014/09/11/running-gui-apps-with-docker/
+TODO read again ref [3]
+- THE PIPELINE:
++ split data to training, testing, how about the ratio ?
++ preprocessing, vocabulary size, vocabulary builder
++ build the graph, hyper-parameters: batch size, kernel size, dropout, LC size, number of cnn layers, number of LC layers, vocabulary size. Graph architecture. Word embedding
++ optimizing: learning rate, decay learning rate, momentum, test size
++ measure accuracy, loss ?
++ size of dataset ?
+
+- Coding test the whole testing data
