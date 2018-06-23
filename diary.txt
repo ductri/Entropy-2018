@@ -62,7 +62,10 @@ TODO strategies for cutting too much long sentence: cut the tail, cut the head, 
 - Should get overfitting first to confirm we're having a proper model !!! 
 --> Confirmed !
 
-- TODO create checkpoint, it is a must !!
+-  create checkpoint, it is a must !!
+--> Done
 - TODO try this: just pre-train word embedding, then feed to a logistic regression to the a look
-- TODO extract parameters with summary name
+- extract parameters with summary name
+--> Done
 - TODO formally state the pipeline to get a big picture, then consider where on the pipeline should be focused
+- The skeleton has been quite strong so far

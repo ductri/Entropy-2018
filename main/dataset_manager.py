@@ -51,7 +51,12 @@ class DatasetManager:
             for j in range((self.train_X.shape[0] // batch_size) - 1):
                 yield temp_X[j*batch_size:(j+1)*batch_size, :], temp_y[j*batch_size:(j+1)*batch_size]
 
-    def get_test_set(self, size):
+    def get_test_set(self, size, is_shuffled=True):
+        if is_shuffled:
+            shuffled_index = list(range(size))
+            np.random.shuffle(shuffled_index)
+            return self.test_X[shuffled_index], self.test_y[shuffled_index]
+
         return self.test_X[:size], self.test_y[:size]
 
     def get_vocab_size(self):
