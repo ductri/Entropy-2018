@@ -111,4 +111,6 @@ More detail at logs/info_params.log or logs/debug.log
 - TODO summay norm gradient
 - Accuracy on test still doesn't increase, approximately 0.79. That proves we are stucking in a local minimum despite of how much capacity the model is. The more capacity the model is, the faster we getting in that stucking point.
 - Maybe decreasing capacity helps improving the accuracy., look at 2018-06-24T08:35:22|2018-06-24T08:18:42
+- F***, stucking with 0.79
+- TODO try to increase training data
 
