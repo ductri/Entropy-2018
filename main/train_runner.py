@@ -7,13 +7,18 @@ from ruamel.yaml import YAML
 from datetime import datetime
 
 
-import model_v1
 from dataset_manager import DatasetManager
 import utils
 
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+FLAGS = tf.flags.FLAGS
 
+tf.flags.DEFINE_string('MODEL_VERSION', 'v1', 'version of model')
+if FLAGS.MODEL_VERSION == 'v1':
+    import model_v1 as model
+elif FLAGS.MODEL_VERSION == 'v2':
+    import model_v2 as model
 
 tf.flags.DEFINE_string('ALL_DATASET', '/home/ductri/code/all_dataset/', 'path to all dataset')
 tf.flags.DEFINE_integer('BATCH_SIZE', 64, 'batch size')
@@ -36,20 +41,17 @@ tf.flags.DEFINE_integer('FC0_SIZE', 100, 'output size of fully connected layer 0
 tf.flags.DEFINE_boolean('LOG_DEVICE_PLACEMENT', False, 'display which devices are using')
 
 
-FLAGS = tf.flags.FLAGS
-
-
 def run(experiment_name):
     with tf.Graph().as_default() as gr:
         with tf.variable_scope('input'):
-            tf_input = tf.placeholder(dtype=tf.int32, shape=[None, model_v1.SENTENCE_LENGTH_MAX], name='tf_input')
+            tf_input = tf.placeholder(dtype=tf.int32, shape=[None, model.SENTENCE_LENGTH_MAX], name='tf_input')
             tf_labels = tf.placeholder(dtype=tf.int32, shape=[None], name='tf_labels')
 
-        tf_logits = model_v1.inference(tf_input)
-        tf_loss = model_v1.loss(tf_logits, tf_labels)
+        tf_logits = model.inference(tf_input)
+        tf_loss = model.loss(tf_logits, tf_labels)
 
-        tf_optimizer, tf_global_step = model_v1.optimize(tf_loss)
-        model_v1.measure_acc(tf_logits, tf_labels)
+        tf_optimizer, tf_global_step = model.optimize(tf_loss)
+        model.measure_acc(tf_logits, tf_labels)
 
         tf_all_summary = tf.summary.merge_all()
 
@@ -94,7 +96,7 @@ def run(experiment_name):
                     })
                     tf_test_writer.add_summary(test_summary_data, global_step=global_step)
 
-                if global_step % 20 == 0:
+                if global_step % 200 == 0:
                     path_to_save = os.path.join(CURRENT_DIR, '..', 'checkpoint', experiment_name)
                     if not os.path.exists(path_to_save):
                         os.makedirs(path_to_save)
