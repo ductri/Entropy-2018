@@ -42,6 +42,9 @@ if FLAGS.MODEL_VERSION == 'v1':
     import model_v1 as model
 elif FLAGS.MODEL_VERSION == 'v2':
     import model_v2 as model
+elif FLAGS.MODEL_VERSION == 'v3':
+    import model_v3 as model
+
 
 def run(experiment_name):
     with tf.Graph().as_default() as gr:
@@ -76,7 +79,6 @@ def run(experiment_name):
             dataset_manager.boot()
 
             for docs, labels in dataset_manager.get_batch(batch_size=FLAGS.BATCH_SIZE, number_epochs=FLAGS.NUMBER_EPOCHS):
-                break
                 _, global_step = sess.run([tf_optimizer, tf_global_step],
                                           feed_dict={
                                               tf_input: docs,
