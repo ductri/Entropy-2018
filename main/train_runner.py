@@ -41,8 +41,9 @@ FLAGS = tf.flags.FLAGS
 
 def run(experiment_name):
     with tf.Graph().as_default() as gr:
-        tf_input = tf.placeholder(dtype=tf.int32, shape=[None, model_v1.SENTENCE_LENGTH_MAX])
-        tf_labels = tf.placeholder(dtype=tf.int32, shape=[None])
+        with tf.variable_scope('input'):
+            tf_input = tf.placeholder(dtype=tf.int32, shape=[None, model_v1.SENTENCE_LENGTH_MAX], name='tf_input')
+            tf_labels = tf.placeholder(dtype=tf.int32, shape=[None], name='tf_labels')
 
         tf_logits = model_v1.inference(tf_input)
         tf_loss = model_v1.loss(tf_logits, tf_labels)
@@ -93,33 +94,23 @@ def run(experiment_name):
                     })
                     tf_test_writer.add_summary(test_summary_data, global_step=global_step)
 
-                if global_step % 200 == 0:
+                if global_step % 20 == 0:
                     path_to_save = os.path.join(CURRENT_DIR, '..', 'checkpoint', experiment_name)
                     if not os.path.exists(path_to_save):
                         os.makedirs(path_to_save)
-                    saved_file = saver.save(sess, save_path=path_to_save, global_step=global_step)
+                    saved_file = saver.save(sess,
+                                            save_path=os.path.join(path_to_save, 'step'),
+                                            global_step=global_step,
+                                            write_meta_graph=True)
                     logging.debug('Saving model at %s', saved_file)
 
 
 def main(argv=None):
     experiment_name = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S')
-    logging.info('*' * 50)
-    logging.info('--- All parameters for running experiment: %s', experiment_name)
-    params = FLAGS.flag_values_dict()
-    for key in params:
-        logging.info('{}: {}'.format(key, params[key]))
-    logging.info('*' * 50)
-
+    utils.logging_parameters(experiment_name)
     run(experiment_name)
 
 
-def setup_logging():
-    yaml = YAML(typ='safe')
-    with open(os.path.join(CURRENT_DIR, 'config_logging.yaml'), 'rt') as f:
-        config = yaml.load(f.read())
-    logging.config.dictConfig(config)
-
-
 if __name__ == '__main__':
-    setup_logging()
+    utils.setup_logging()
     tf.app.run()

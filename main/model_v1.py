@@ -164,7 +164,7 @@ def predict(tf_logits):
     :param batch_sentences: [batch_size, sentence_length_max]
     :return:
     """
-    tf_predicts = tf.argmax(tf_logits, axis=1, output_type=tf.int32)
+    tf_predicts = tf.argmax(tf_logits, axis=1, output_type=tf.int32, name='prediction')
     return tf_predicts
 
 

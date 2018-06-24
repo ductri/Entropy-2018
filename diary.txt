@@ -86,3 +86,14 @@ TODO read again ref [3]
 + size of dataset ?
 
 - Coding test the whole testing data
+00:16 24-06-2018
+- It's seemed that dropout doesn't matter, it just shifts the cross points to the right a bit. Look at "11:34:39|11:40:48". 
+- There is nothing absolutely either 1 or 0, it's always a ratio between.
+- Dropout may even decreases the performance
+TODO code to test on the whole testing dataset. This is the only way to accurately tune hyper-parameters.
+- An interesting point: loss is increasing but accurary isn't changing in the test set.
+08:51 24-06-2018
+- Coding evaluation function
+--> Done
+- git tag v1.1
+

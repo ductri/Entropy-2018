@@ -59,6 +59,11 @@ class DatasetManager:
 
         return self.test_X[:size], self.test_y[:size]
 
+    def get_test_by_batch(self, batch_size):
+        logging.info('There will be approximately {} steps'.format(self.test_X.shape[0] // batch_size))
+        for i in range((self.test_X.shape[0] // batch_size) - 1):
+            yield self.test_X[i*batch_size:(i+1)*batch_size, :], self.test_y[i*batch_size:(i+1)*batch_size]
+
     def get_vocab_size(self):
         return len(self.text2vec.int_to_vocab)
 
