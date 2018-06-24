@@ -70,13 +70,13 @@ class Text2Vector:
         return word_tokenize(text)
 
     def doc_to_vec(self, list_documents):
-        logging.info('-- From doc_to_vec')
+        logging.debug('-- From doc_to_vec')
         assert isinstance(list_documents, list)
         len_list = len(list_documents)
         tokenized_documents = []
         for i, doc in enumerate(list_documents):
             if i % 100 == 0:
-                logging.info('--- Tokenizing: {}\{}, len={}'.format(i, len_list, len(doc)))
+                logging.debug('--- Tokenizing: {}\{}, len={}'.format(i, len_list, len(doc)))
             tokenized_documents.append(self.__tokenize(doc))
 
         return [self.__transform(doc) for doc in tokenized_documents]
@@ -86,7 +86,7 @@ class Text2Vector:
         return [self.__invert_transform(vec) for vec in list_vecs]
 
     def fit(self, list_texts):
-        logging.info('-- From fit')
+        logging.debug('-- From fit')
         if self.counts or self.vocab_to_int or self.int_to_vocab:
             raise Exception('"fit" is a one-time function')
 

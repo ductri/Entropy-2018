@@ -105,8 +105,11 @@ def inference(batch_sentences):
     :param batch_sentences: [batch_size, sentence_length_max]
     :return: logits
     """
+    logging.info('Input shape: %s', batch_sentences.shape)
+
     projected_input = __project_words(batch_sentences)
     projected_input = tf.reshape(tensor=projected_input, shape=[-1] + list(projected_input.shape[1:]) + [1])
+    logging.info('After projection: %s', projected_input.shape)
 
     after_conv = __conv(projected_input,
                         kernel_filter_size=FLAGS.CONV0_KERNEL_FILTER_SIZE,

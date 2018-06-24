@@ -33,6 +33,8 @@ tf.flags.DEFINE_integer('CONV1_NUMBER_FILTERS', 10, 'number of filters in conv 1
 tf.flags.DEFINE_float('CONV1_DROPOUT', 0.3, 'dropout rate in conv 1')
 
 tf.flags.DEFINE_integer('FC0_SIZE', 100, 'output size of fully connected layer 0')
+tf.flags.DEFINE_float('FC0_DROPOUT', 0.3, 'dropout rate in FC 0')
+tf.flags.DEFINE_float('FC1_DROPOUT', 0.3, 'dropout rate in FC 1')
 
 tf.flags.DEFINE_boolean('LOG_DEVICE_PLACEMENT', False, 'display which devices are using')
 
@@ -62,7 +64,7 @@ def run(experiment_name):
 
         logging.info('Graph size: %s', utils.count_trainable_variables())
 
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.95)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.5)
         with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options,
                                               allow_soft_placement=True,
                                               log_device_placement=FLAGS.LOG_DEVICE_PLACEMENT
@@ -74,6 +76,7 @@ def run(experiment_name):
             dataset_manager.boot()
 
             for docs, labels in dataset_manager.get_batch(batch_size=FLAGS.BATCH_SIZE, number_epochs=FLAGS.NUMBER_EPOCHS):
+                break
                 _, global_step = sess.run([tf_optimizer, tf_global_step],
                                           feed_dict={
                                               tf_input: docs,

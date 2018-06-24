@@ -57,9 +57,9 @@ def __conv(tensor_input, kernel_filter_size, kernel_pooling_size, number_filters
     assert len(tensor_input.shape) == 4, len(tensor_input.shape)
     with tf.variable_scope('convolution_layer_{}'.format(name)):
         tf_filters = tf.get_variable(name='kernel',
-                                     shape=(kernel_filter_size, tensor_input.shape[2], tensor_input.shape[3], number_filters),
+                                     shape=(kernel_filter_size, kernel_filter_size, tensor_input.shape[3], number_filters),
                                      dtype=DEFAULT_TYPE, initializer=DEFAULT_INITIALIZER())
-        tf_output = tf.nn.conv2d(tensor_input, tf_filters, strides=[1, stride, stride, 1], padding='VALID')
+        tf_output = tf.nn.conv2d(tensor_input, tf_filters, strides=[1, stride, stride, 1], padding='SAME')
 
         tf_bias = tf.get_variable(name='bias',
                                   shape=[number_filters],
@@ -69,7 +69,7 @@ def __conv(tensor_input, kernel_filter_size, kernel_pooling_size, number_filters
 
         tf_output = tf.nn.relu(tf_output)
 
-        tf_output = tf.nn.max_pool(tf_output, ksize=[1, kernel_pooling_size, 1, 1], strides=[1, 1, 1, 1], padding='VALID')
+        tf_output = tf.nn.max_pool(tf_output, ksize=[1, kernel_pooling_size, kernel_pooling_size, 1], strides=[1, 1, 1, 1], padding='VALID')
 
         tf_output = tf.nn.dropout(tf_output, keep_prob=1-dropout)
 
@@ -77,7 +77,7 @@ def __conv(tensor_input, kernel_filter_size, kernel_pooling_size, number_filters
     return tf_output
 
 
-def __fc(tensor_input, size, name=0):
+def __fc(tensor_input, size, dropout, name=0):
     assert len(tensor_input.shape) == 2, len(tensor_input.shape)
     with tf.variable_scope('fully_connected_layer_{}'.format(name)):
         tf_weights = tf.get_variable(name='weights',
@@ -88,6 +88,7 @@ def __fc(tensor_input, size, name=0):
 
         tf_bias = tf.get_variable(name='bias', shape=[size], dtype=DEFAULT_TYPE, initializer=ZERO_INITIALIZER())
         tf_output = tf.nn.bias_add(tf_output, tf_bias)
+        tf_output = tf.nn.dropout(tf_output, keep_prob=1 - dropout)
 
     assert tf_output.shape[1] == size, tf_output.shape[1]
     return tf_output
@@ -105,32 +106,35 @@ def inference(batch_sentences):
     :param batch_sentences: [batch_size, sentence_length_max]
     :return: logits
     """
+    logging.info('Input shape: %s', batch_sentences.shape)
+
     projected_input = __project_words(batch_sentences)
     projected_input = tf.reshape(tensor=projected_input, shape=[-1] + list(projected_input.shape[1:]) + [1])
+    logging.info('After projection: %s', projected_input.shape)
 
     after_conv = __conv(projected_input,
                         kernel_filter_size=FLAGS.CONV0_KERNEL_FILTER_SIZE,
                         kernel_pooling_size=FLAGS.CONV0_KERNEL_POOLING_SIZE,
                         number_filters=FLAGS.CONV0_NUMBER_FILTERS,
                         dropout=FLAGS.CONV0_DROPOUT,
-                        stride=1, name=0)
+                        stride=2, name=0)
     logging.info('After conv 0: %s', after_conv.shape)
 
-    after_conv = __conv(projected_input,
+    after_conv = __conv(after_conv,
                         kernel_filter_size=FLAGS.CONV1_KERNEL_FILTER_SIZE,
                         kernel_pooling_size=FLAGS.CONV1_KERNEL_POOLING_SIZE,
                         number_filters=FLAGS.CONV1_NUMBER_FILTERS,
                         dropout=FLAGS.CONV1_DROPOUT,
-                        stride=1, name=1)
+                        stride=2, name=1)
     logging.info('After conv 1: %s', after_conv.shape)
 
     flatten = tf.reshape(after_conv, [-1, after_conv.shape[1] * after_conv.shape[2] * after_conv.shape[3]])
     logging.info('After flatt: %s', flatten.shape)
 
-    after_fc = __fc(flatten, size=FLAGS.FC0_SIZE, name=0)
+    after_fc = __fc(flatten, size=FLAGS.FC0_SIZE, dropout=FLAGS.FC0_DROPOUT, name=0)
     logging.info('After fc 0: %s', after_fc.shape)
 
-    after_fc = __fc(after_fc, 3, name=1)
+    after_fc = __fc(after_fc, 3, dropout=FLAGS.FC1_DROPOUT, name=1)
     logging.info('After fc 1: %s', after_fc.shape)
 
     return after_fc

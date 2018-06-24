@@ -113,4 +113,7 @@ More detail at logs/info_params.log or logs/debug.log
 - Maybe decreasing capacity helps improving the accuracy., look at 2018-06-24T08:35:22|2018-06-24T08:18:42
 - F***, stucking with 0.79
 - TODO try to increase training data
-
+20:44 24-06-2018
+- Oke, let's go with more training data
+--> It may works, but not sure, the testing data size decreases to 10k, acc= ~0.8060
+- TODO add dropout in LC layer
