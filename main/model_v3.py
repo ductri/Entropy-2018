@@ -77,7 +77,7 @@ def __conv(tensor_input, kernel_filter_size, kernel_pooling_size, number_filters
     return tf_output
 
 
-def __fc(tensor_input, size, dropout, name=0):
+def __fc(tensor_input, size, name=0):
     assert len(tensor_input.shape) == 2, len(tensor_input.shape)
     with tf.variable_scope('fully_connected_layer_{}'.format(name)):
         tf_weights = tf.get_variable(name='weights',
@@ -88,7 +88,10 @@ def __fc(tensor_input, size, dropout, name=0):
 
         tf_bias = tf.get_variable(name='bias', shape=[size], dtype=DEFAULT_TYPE, initializer=ZERO_INITIALIZER())
         tf_output = tf.nn.bias_add(tf_output, tf_bias)
-        tf_output = tf.nn.dropout(tf_output, keep_prob=1 - dropout)
+
+        tf_output = tf.nn.relu(tf_output)
+
+        # tf_output = tf.nn.dropout(tf_output, keep_prob=1 - dropout)
 
     assert tf_output.shape[1] == size, tf_output.shape[1]
     return tf_output
@@ -131,10 +134,12 @@ def inference(batch_sentences):
     flatten = tf.reshape(after_conv, [-1, after_conv.shape[1] * after_conv.shape[2] * after_conv.shape[3]])
     logging.info('After flatt: %s', flatten.shape)
 
-    after_fc = __fc(flatten, size=FLAGS.FC0_SIZE, dropout=FLAGS.FC0_DROPOUT, name=0)
+    after_fc = __fc(flatten, size=FLAGS.FC0_SIZE, name=0)
     logging.info('After fc 0: %s', after_fc.shape)
 
-    after_fc = __fc(after_fc, 3, dropout=FLAGS.FC1_DROPOUT, name=1)
+    after_fc = tf.nn.dropout(after_fc, keep_prob=0.7)
+
+    after_fc = __fc(after_fc, 3, name=1)
     logging.info('After fc 1: %s', after_fc.shape)
 
     return after_fc

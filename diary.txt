@@ -117,3 +117,10 @@ More detail at logs/info_params.log or logs/debug.log
 - Oke, let's go with more training data
 --> It may works, but not sure, the testing data size decreases to 10k, acc= ~0.8060
 - TODO add dropout in LC layer
+--> omg, stupid thing, it almost cannot be learned as the loss doesn't come down. look at 2018-06-24T16:53:35. I guess the reason is about dropout at the last FC, which gets involve the output class.
+--> 2018-06-24T17:05:22. model v3 is edited: cut dropout at fc, add relu at last. It seems to work
+--> Continue to edit v3: add dropout between 2 FCs with keep_ratio=0.7
+
+
+
+
