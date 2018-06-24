@@ -15,10 +15,6 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 FLAGS = tf.flags.FLAGS
 
 tf.flags.DEFINE_string('MODEL_VERSION', 'v1', 'version of model')
-if FLAGS.MODEL_VERSION == 'v1':
-    import model_v1 as model
-elif FLAGS.MODEL_VERSION == 'v2':
-    import model_v2 as model
 
 tf.flags.DEFINE_string('ALL_DATASET', '/home/ductri/code/all_dataset/', 'path to all dataset')
 tf.flags.DEFINE_integer('BATCH_SIZE', 64, 'batch size')
@@ -40,6 +36,10 @@ tf.flags.DEFINE_integer('FC0_SIZE', 100, 'output size of fully connected layer 0
 
 tf.flags.DEFINE_boolean('LOG_DEVICE_PLACEMENT', False, 'display which devices are using')
 
+if FLAGS.MODEL_VERSION == 'v1':
+    import model_v1 as model
+elif FLAGS.MODEL_VERSION == 'v2':
+    import model_v2 as model
 
 def run(experiment_name):
     with tf.Graph().as_default() as gr:

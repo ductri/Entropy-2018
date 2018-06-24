@@ -57,7 +57,7 @@ def __conv(tensor_input, kernel_filter_size, kernel_pooling_size, number_filters
     assert len(tensor_input.shape) == 4, len(tensor_input.shape)
     with tf.variable_scope('convolution_layer_{}'.format(name)):
         tf_filters = tf.get_variable(name='kernel',
-                                     shape=(kernel_filter_size, FLAGS.EMBEDDING_SIZE, tensor_input.shape[3], number_filters),
+                                     shape=(kernel_filter_size, tensor_input.shape[2], tensor_input.shape[3], number_filters),
                                      dtype=DEFAULT_TYPE, initializer=DEFAULT_INITIALIZER())
         tf_output = tf.nn.conv2d(tensor_input, tf_filters, strides=[1, stride, stride, 1], padding='SAME')
 
@@ -69,7 +69,7 @@ def __conv(tensor_input, kernel_filter_size, kernel_pooling_size, number_filters
 
         tf_output = tf.nn.relu(tf_output)
 
-        tf_output = tf.nn.max_pool(tf_output, ksize=[1, kernel_pooling_size, FLAGS.EMBEDDING_SIZE, 1], strides=[1, 1, 1, 1], padding='VALID')
+        tf_output = tf.nn.max_pool(tf_output, ksize=[1, kernel_pooling_size, kernel_pooling_size, 1], strides=[1, 1, 1, 1], padding='VALID')
 
         tf_output = tf.nn.dropout(tf_output, keep_prob=1-dropout)
 
