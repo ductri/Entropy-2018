@@ -44,6 +44,8 @@ elif FLAGS.MODEL_VERSION == 'v2':
     import model_v2 as model
 elif FLAGS.MODEL_VERSION == 'v3':
     import model_v3 as model
+elif FLAGS.MODEL_VERSION == 'v4':
+    import model_v4 as model
 
 
 def run(experiment_name):
@@ -67,7 +69,7 @@ def run(experiment_name):
 
         logging.info('Graph size: %s', utils.count_trainable_variables())
 
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.5)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.95)
         with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options,
                                               allow_soft_placement=True,
                                               log_device_placement=FLAGS.LOG_DEVICE_PLACEMENT
