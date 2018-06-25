@@ -69,7 +69,7 @@ def __conv(tensor_input, kernel_filter_size, kernel_pooling_size, number_filters
 
         tf_output = tf.nn.relu(tf_output)
 
-        tf_output = tf.nn.max_pool(tf_output, ksize=[1, kernel_pooling_size, kernel_pooling_size, 1], strides=[1, 1, 1, 1], padding='VALID')
+        tf_output = tf.nn.max_pool(tf_output, ksize=[1, kernel_pooling_size, kernel_pooling_size, 1], strides=[1, kernel_pooling_size, kernel_pooling_size, 1], padding='VALID')
 
         tf_output = tf.nn.dropout(tf_output, keep_prob=1-dropout)
 
