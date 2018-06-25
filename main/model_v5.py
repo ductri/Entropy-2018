@@ -1,9 +1,13 @@
 # Started at 11:30 19-06-2018
 import logging
 import tensorflow as tf
+import numpy as np
+
+from embedding_v5 import Embedding
 
 
-VOCAB_SIZE = 10002
+
+VOCAB_SIZE = 1996725
 SENTENCE_LENGTH_MAX = 150
 
 DEFAULT_TYPE = tf.float32
@@ -29,8 +33,9 @@ def __project_words(batch_sentences):
     assert batch_sentences.shape[1] == SENTENCE_LENGTH_MAX
 
     with tf.device('/cpu:0'), tf.variable_scope('embedding'):
-        word_embeddings = tf.get_variable(name='word_embeddings', dtype=DEFAULT_TYPE, shape=[VOCAB_SIZE, FLAGS.EMBEDDING_SIZE],
-                                          initializer=DEFAULT_INITIALIZER())
+        # word_embeddings = tf.get_variable(name='word_embeddings', dtype=DEFAULT_TYPE, shape=[VOCAB_SIZE, FLAGS.EMBEDDING_SIZE],
+        #                                   initializer=DEFAULT_INITIALIZER())
+        word_embeddings = tf.constant(np.array(Embedding.load_pretrained_vectors(FLAGS.WORD_EMBEDDING_FILE).values()))
         projected_words = tf.nn.embedding_lookup(params=word_embeddings, ids=batch_sentences)
 
     assert len(projected_words.shape) == 3

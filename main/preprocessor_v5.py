@@ -8,7 +8,7 @@ import logging
 import nltk
 import io
 import tensorflow as tf
-
+from embedding_v5 import Embedding
 
 FLAGS = tf.flags.FLAGS
 
@@ -89,22 +89,13 @@ class Text2Vector:
         if self.counts or self.vocab_to_int or self.int_to_vocab:
             raise Exception('"fit" is a one-time function')
 
-        self.__load_pretrained_vectors(FLAGS.WORD_EMBEDDING_FILE)
+        self.pretrained_vectors = Embedding.load_pretrained_vectors(FLAGS.WORD_EMBEDDING_FILE)
         self.__load_vocab()
         self.int_to_vocab = [Text2Vector.PADDING] + self.int_to_vocab + [Text2Vector.OUT_OF_VOCAB]
         self.vocab_to_int = {word: index for index, word in enumerate(self.int_to_vocab)}
 
     def __load_vocab(self):
         self.int_to_vocab = self.pretrained_vectors.keys()
-
-    def __load_pretrained_vectors(self, fname):
-        fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
-        n, d = map(int, fin.readline().split())
-        self.pretrained_vectors = {}
-        for line in fin:
-            tokens = line.rstrip().split(' ')
-            self.pretrained_vectors[tokens[0]] = map(float, tokens[1:])
-
 
     def __transform(self, list_tokens):
         if not self.vocab_to_int:
@@ -132,6 +123,9 @@ class Text2Vector:
         if not self.counts:
             raise Exception('counts is None')
         return self.counts.most_common(n)
+
+
+
 
 
 def preprocess(list_docs):
