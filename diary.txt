@@ -125,4 +125,4 @@ More detail at logs/info_params.log or logs/debug.log
 - So far, I've been thinking the improment doesn't come from the change of architecture but the increasing of training data
 19:37 25:06-2018
 - Ok, let's with pretrain embedding. But first, choose the modest model which still get 0.79 accuracy on test.
-
+- Have an idea, padding as the same as out_of_vocab

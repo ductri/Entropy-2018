@@ -6,7 +6,11 @@ import itertools
 import numpy as np
 import logging
 import nltk
+import io
+import tensorflow as tf
 
+
+FLAGS = tf.flags.FLAGS
 
 nltk.download('punkt')
 
@@ -46,20 +50,15 @@ def extract_and_remove_hashtag_df(df, output_file):
     return df
 
 
-def get_most_popular_hashtag(n=10):
-    list_hashtags = list(pd.read_csv('./hashtags.csv').iloc[:, 0])
-    c = collections.Counter(list_hashtags)
-    return c.most_common(n)
-
-
 class Text2Vector:
-    OUT_OF_VOCAB = 'PADDING'
+    OUT_OF_VOCAB = 'OUT_OF_VOCAB'
     PADDING = 'PADDING'
 
     def __init__(self):
         self.counts = None
         self.int_to_vocab = None
         self.vocab_to_int = None
+        self.pretrained_vectors = None
 
     def __tokenize(self, text):
         """
@@ -90,13 +89,22 @@ class Text2Vector:
         if self.counts or self.vocab_to_int or self.int_to_vocab:
             raise Exception('"fit" is a one-time function')
 
-        list_tokenized_texts = [self.__tokenize(text) for text in list_texts]
-        all_tokens = itertools.chain(*list_tokenized_texts)
-        self.counts = collections.Counter(all_tokens)
-
-        self.int_to_vocab = self.__get_vocab()
-        self.int_to_vocab = [Text2Vector.PADDING] + self.int_to_vocab
+        self.__load_pretrained_vectors(FLAGS.WORD_EMBEDDING_FILE)
+        self.__load_vocab()
+        self.int_to_vocab = [Text2Vector.PADDING] + self.int_to_vocab + [Text2Vector.OUT_OF_VOCAB]
         self.vocab_to_int = {word: index for index, word in enumerate(self.int_to_vocab)}
+
+    def __load_vocab(self):
+        self.int_to_vocab = self.pretrained_vectors.keys()
+
+    def __load_pretrained_vectors(self, fname):
+        fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
+        n, d = map(int, fin.readline().split())
+        self.pretrained_vectors = {}
+        for line in fin:
+            tokens = line.rstrip().split(' ')
+            self.pretrained_vectors[tokens[0]] = map(float, tokens[1:])
+
 
     def __transform(self, list_tokens):
         if not self.vocab_to_int:

@@ -17,6 +17,7 @@ FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_string('MODEL_VERSION', 'v1', 'version of model')
 
 tf.flags.DEFINE_string('ALL_DATASET', '/home/ductri/code/all_dataset/', 'path to all dataset')
+tf.flags.DEFINE_string('WORD_EMBEDDING_FILE', '/home/ductri/code/all_dataset/', 'path to all dataset')
 tf.flags.DEFINE_integer('BATCH_SIZE', 64, 'batch size')
 tf.flags.DEFINE_integer('NUMBER_EPOCHS', 1, 'number of epochs size')
 tf.flags.DEFINE_integer('TEST_SIZE', 1000, 'test size')
