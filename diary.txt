@@ -138,4 +138,6 @@ More detail at logs/info_params.log or logs/debug.log
  [ 142  388 2278]]
 19:14 26-06-2018
 - Start to code LSTM: model_v6. It took about 1h to code a very simple network :3 :(
-
+Funny bugs: set tf_global_step with int16, so, after a while, it began to decrease to negative
+00:20 27-06-2018
+Lala, it works, a simple LSTM works, 0.79 was passed. Next obstacle is 0.81
