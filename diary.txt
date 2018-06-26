@@ -131,4 +131,11 @@ More detail at logs/info_params.log or logs/debug.log
 13:32 26-06-2018
 - Predict samples with model: 2018-06-25T13:48:53
 - TODO decrease SENTENCE_LENGTH_MAX=100
+--> 75, prone to overfit
 - TODO weighted loss
+[[1959  760  157]
+ [ 311 3009  212]
+ [ 142  388 2278]]
+19:14 26-06-2018
+- Start to code LSTM: model_v6
+

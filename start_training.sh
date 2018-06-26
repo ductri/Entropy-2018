@@ -1,7 +1,7 @@
 #!/bin/bash
 
 python main/train_runner.py \
---MODEL_VERSION=v1 \
+--MODEL_VERSION=v6 \
 --ALL_DATASET=/all_dataset \
 --BATCH_SIZE=64 \
 --TEST_SIZE=1000 \
@@ -17,4 +17,5 @@ python main/train_runner.py \
 --CONV0_KERNEL_FILTER_SIZE=5 \
 --CONV1_KERNEL_FILTER_SIZE=5 \
 --FC0_DROPOUT=0.3 \
---FC1_DROPOUT=0.3
+--FC1_DROPOUT=0.3 \
+--NUM_HIDDEN=100

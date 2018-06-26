@@ -37,6 +37,8 @@ tf.flags.DEFINE_integer('FC0_SIZE', 100, 'output size of fully connected layer 0
 tf.flags.DEFINE_float('FC0_DROPOUT', 0.3, 'dropout rate in FC 0')
 tf.flags.DEFINE_float('FC1_DROPOUT', 0.3, 'dropout rate in FC 1')
 
+tf.flags.DEFINE_float('NUM_HIDDEN', 100, 'size of LSTM cell')
+
 tf.flags.DEFINE_boolean('LOG_DEVICE_PLACEMENT', False, 'display which devices are using')
 
 if FLAGS.MODEL_VERSION == 'v1':
@@ -49,6 +51,8 @@ elif FLAGS.MODEL_VERSION == 'v4':
     import model_v4 as model
 elif FLAGS.MODEL_VERSION == 'v5':
     import model_v5 as model
+elif FLAGS.MODEL_VERSION == 'v6':
+    import model_v6 as model
 
 
 def run(experiment_name):
