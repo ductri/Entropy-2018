@@ -65,6 +65,7 @@ def loss(tf_logits, batch_labels):
     :return:
     """
     assert len(tf_logits.shape) == 2, len(tf_logits.shape)
+    assert tf_logits.shape[1] == 3
     tf_losses = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=batch_labels, logits=tf_logits)
     tf_aggregated_loss = tf.reduce_mean(tf_losses)
 
@@ -73,7 +74,7 @@ def loss(tf_logits, batch_labels):
 
 
 def optimize(tf_loss):
-    tf_global_step = tf.get_variable(name='global_step', dtype=tf.int16, shape=(), initializer=ZERO_INITIALIZER())
+    tf_global_step = tf.get_variable(name='global_step', dtype=tf.int32, shape=(), initializer=ZERO_INITIALIZER())
 
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=FLAGS.LEARNING_RATE).minimize(tf_loss, global_step=tf_global_step)
     return optimizer, tf_global_step
@@ -115,6 +116,6 @@ def inference(batch_sentences):
         lstm_cell = rnn.BasicLSTMCell(FLAGS.NUM_HIDDEN, forget_bias=1.0)
         outputs, states = rnn.static_rnn(cell=lstm_cell, inputs=word_embeddings, dtype=tf.float32)
     tf_logits = __fc(tensor_input=outputs[-1], size=FLAGS.FC0_SIZE, name=0)
-
+    tf_logits = __fc(tensor_input=tf_logits, size=3, name=1)
     return tf_logits
 

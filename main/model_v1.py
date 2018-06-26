@@ -147,6 +147,7 @@ def loss(tf_logits, batch_labels):
     :return:
     """
     assert len(tf_logits.shape) == 2, len(tf_logits.shape)
+    assert tf_logits.shape[1] == 3
     tf_losses = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=batch_labels, logits=tf_logits)
     tf_aggregated_loss = tf.reduce_mean(tf_losses)
 
@@ -155,7 +156,7 @@ def loss(tf_logits, batch_labels):
 
 
 def optimize(tf_loss):
-    tf_global_step = tf.get_variable(name='global_step', dtype=tf.int16, shape=(), initializer=ZERO_INITIALIZER())
+    tf_global_step = tf.get_variable(name='global_step', dtype=tf.int32, shape=(), initializer=ZERO_INITIALIZER())
 
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.05).minimize(tf_loss, global_step=tf_global_step)
     return optimizer, tf_global_step
