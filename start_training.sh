@@ -18,7 +18,7 @@ python main/train_runner.py \
 --CONV1_KERNEL_FILTER_SIZE=5 \
 --FC0_DROPOUT=0.3 \
 --FC1_DROPOUT=0.3 \
---NUM_HIDDEN=100 \
+--NUM_HIDDEN=500 \
 --LEARNING_RATE=0.05 \
---GPU=0.5
+--GPU=0.7
 

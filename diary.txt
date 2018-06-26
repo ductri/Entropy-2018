@@ -140,4 +140,22 @@ More detail at logs/info_params.log or logs/debug.log
 - Start to code LSTM: model_v6. It took about 1h to code a very simple network :3 :(
 Funny bugs: set tf_global_step with int16, so, after a while, it began to decrease to negative
 00:20 27-06-2018
-Lala, it works, a simple LSTM works, 0.79 was passed. Next obstacle is 0.81
+- Lala, it works, a simple LSTM works, 0.79 was passed. Next obstacle is 0.81
+- Yeah, new records: 0.81
++ Model: 2018-06-26T16:25:00
++ Step: 73600
+-- Report for model: 2018-06-26T16:25:00
+2018-06-26 17:35:02,511 - root - INFO -              
+				precision    recall  f1-score   support
+
+          0       0.79      0.78      0.79      2876
+          1       0.80      0.83      0.81      3532
+          2       0.88      0.85      0.87      2808
+
+avg / total       0.82      0.82      0.82      9216
+- Confusion matrix:
+[[2250  494  132]
+ [ 413 2919  200]
+ [ 170  240 2398]]
+- I've though that the more parameters, the more capacity the network possesses. But it is not true. The v1's number of parameters has varied from 2mi to 8mi, the result was still around 0.79, but a simple LSTM can reach 0.82 for the very first try. Very imposing result !
+- Try with hidden=500
