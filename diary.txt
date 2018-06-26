@@ -137,5 +137,5 @@ More detail at logs/info_params.log or logs/debug.log
  [ 311 3009  212]
  [ 142  388 2278]]
 19:14 26-06-2018
-- Start to code LSTM: model_v6
+- Start to code LSTM: model_v6. It took about 1h to code a very simple network :3 :(
 

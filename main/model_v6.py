@@ -75,7 +75,7 @@ def loss(tf_logits, batch_labels):
 def optimize(tf_loss):
     tf_global_step = tf.get_variable(name='global_step', dtype=tf.int16, shape=(), initializer=ZERO_INITIALIZER())
 
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.05).minimize(tf_loss, global_step=tf_global_step)
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate=FLAGS.LEARNING_RATE).minimize(tf_loss, global_step=tf_global_step)
     return optimizer, tf_global_step
 
 
@@ -108,8 +108,6 @@ def inference(batch_sentences):
     :param batch_sentences: [batch_size, sentence_length_max]
     :return:
     """
-
-
     word_embeddings = __project_words(batch_sentences)
     word_embeddings = tf.unstack(word_embeddings, SENTENCE_LENGTH_MAX, axis=1) # SENTENCE_LENGTH_MAX tensors which shape=[batch_size, embedding_size]
 
