@@ -3,6 +3,7 @@ import logging
 import tensorflow as tf
 from sklearn.metrics import classification_report
 import pandas as pd
+import model_v1
 
 import utils
 from dataset_manager import DatasetManager
@@ -23,8 +24,8 @@ def predict_sample():
     logging.info('*' * 50)
     logging.info('RUNNING PREDICTION FOR MODEL: %s', FLAGS.EXP_NAME)
 
-    df_test = pd.read_csv(os.path.join(FLAGS.ALL_DATASET, 'test_set.csv'))
-    size = 1000
+    df_test = pd.read_csv(os.path.join(FLAGS.ALL_DATASET, 'entropy_2018', 'test_set.csv'))
+    size = FLAGS.BATCH_SIZE
     docs = df_test['sentence'][:size]
     labels = df_test['sentiment'][:size]
     predict(list_sentences=docs, list_labels=labels, output_file=FLAGS.OUTPUT, experiment_name=FLAGS.EXP_NAME, step=FLAGS.STEP)
@@ -35,6 +36,8 @@ def predict(list_sentences, output_file, experiment_name, step='', list_labels=[
     dataset_manager.boot()
     list_preprocessed_sentences = preprocessor.preprocess(list_sentences)
     list_vecs = dataset_manager.text2vec.doc_to_vec(list_preprocessed_sentences)
+    list_vecs = dataset_manager.equalize_vector_length_to_np(list_vectors=list_vecs, max_length=model_v1.SENTENCE_LENGTH_MAX)
+    list_labels = dataset_manager.convert_labels_to_np(list_labels)
 
     if step == '':
         interesting_checkpoint = tf.train.latest_checkpoint(os.path.join(CURRENT_DIR, '..', 'checkpoint', experiment_name))
@@ -64,7 +67,7 @@ def predict(list_sentences, output_file, experiment_name, step='', list_labels=[
             result_dict = dict()
             result_dict['sentence'] = list_sentences
             result_dict['pre-processed'] = list_preprocessed_sentences
-            result_dict['pre-processed_recover'] = dataset_manager.text2vec.vec_to_doc(list_preprocessed_sentences)
+            result_dict['pre-processed_recover'] = dataset_manager.text2vec.vec_to_doc(list_vecs)
             result_dict['predict'] = prediction
 
             if len(list_labels) != 0:

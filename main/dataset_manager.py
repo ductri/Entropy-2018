@@ -68,10 +68,10 @@ class DatasetManager:
     def get_vocab_size(self):
         return len(self.text2vec.int_to_vocab)
 
-    def __convert_labels_to_np(self, list_text_labels):
+    def convert_labels_to_np(self, list_text_labels):
         return np.array([DatasetManager.LABEL_MAPPING[label] for label in list_text_labels])
 
-    def __equalize_vector_length_to_np(self, list_vectors, max_length):
+    def equalize_vector_length_to_np(self, list_vectors, max_length):
         assert isinstance(list_vectors, list)
         assert isinstance(list_vectors[0], list)
         for i in range(len(list_vectors)):
@@ -106,9 +106,9 @@ class DatasetManager:
             self.text2vec.fit(train_list_docs)
             train_list_vectors = self.text2vec.doc_to_vec(train_list_docs)
 
-            self.train_X = self.__equalize_vector_length_to_np(list_vectors=train_list_vectors, max_length=model_v1.SENTENCE_LENGTH_MAX)
+            self.train_X = self.equalize_vector_length_to_np(list_vectors=train_list_vectors, max_length=model_v1.SENTENCE_LENGTH_MAX)
 
-            self.train_y = self.__convert_labels_to_np(df_train['sentiment'])
+            self.train_y = self.convert_labels_to_np(df_train['sentiment'])
 
             assert self.train_X.shape[0] == self.train_y.shape[0]
 
@@ -137,9 +137,9 @@ class DatasetManager:
 
             test_list_vectors = self.text2vec.doc_to_vec(test_list_docs)
 
-            self.test_X = self.__equalize_vector_length_to_np(list_vectors=test_list_vectors, max_length=model_v1.SENTENCE_LENGTH_MAX)
+            self.test_X = self.equalize_vector_length_to_np(list_vectors=test_list_vectors, max_length=model_v1.SENTENCE_LENGTH_MAX)
 
-            self.test_y = self.__convert_labels_to_np(df_test['sentiment'])
+            self.test_y = self.convert_labels_to_np(df_test['sentiment'])
 
             assert self.test_X.shape[0] == self.test_y.shape[0]
 

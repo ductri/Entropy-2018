@@ -128,3 +128,7 @@ More detail at logs/info_params.log or logs/debug.log
 - Have an idea, padding as the same as out_of_vocab
 --> It didn't work
 - model v5 is using pretrained word embedding from fastext
+13:32 26-06-2018
+- Predict samples with model: 2018-06-25T13:48:53
+- TODO decrease SENTENCE_LENGTH_MAX=100
+- TODO weighted loss
