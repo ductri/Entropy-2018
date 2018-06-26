@@ -2,6 +2,7 @@ import os
 import logging
 import tensorflow as tf
 from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
 
 import utils
 from dataset_manager import DatasetManager
@@ -48,6 +49,7 @@ def evaluate(experiment_name, step=''):
                 logging.debug('-- Prediction length: %s/%s', len(list_predictions), dataset_manager.test_y.shape[0])
             logging.info('-- Report for model: %s', experiment_name)
             logging.info(classification_report(y_true=list_labels, y_pred=list_predictions))
+            logging.info(confusion_matrix(y_true=list_labels, y_pred=list_predictions))
 
 
 def main(argv=None):

@@ -6,6 +6,7 @@ import pandas as pd
 
 import utils
 from dataset_manager import DatasetManager
+import preprocessor
 
 
 tf.flags.DEFINE_string('ALL_DATASET', '/home/ductri/code/all_dataset/', 'path to all dataset')
@@ -18,15 +19,27 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 FLAGS = tf.flags.FLAGS
 
 
-def predict_sample(experiment_name, step=''):
+def predict_sample():
     logging.info('*' * 50)
-    logging.info('RUNNING EVALUATION FOR MODEL: %s', experiment_name)
+    logging.info('RUNNING PREDICTION FOR MODEL: %s', FLAGS.EXP_NAME)
+
+    df_test = pd.read_csv(os.path.join(FLAGS.ALL_DATASET, 'test_set.csv'))
+    size = 1000
+    docs = df_test['sentence'][:size]
+    labels = df_test['sentiment'][:size]
+    predict(list_sentences=docs, list_labels=labels, output_file=FLAGS.OUTPUT, experiment_name=FLAGS.EXP_NAME, step=FLAGS.STEP)
+
+
+def predict(list_sentences, output_file, experiment_name, step='', list_labels=[]):
+    dataset_manager = DatasetManager()
+    dataset_manager.boot()
+    list_preprocessed_sentences = preprocessor.preprocess(list_sentences)
+    list_vecs = dataset_manager.text2vec.doc_to_vec(list_preprocessed_sentences)
+
     if step == '':
         interesting_checkpoint = tf.train.latest_checkpoint(os.path.join(CURRENT_DIR, '..', 'checkpoint', experiment_name))
     else:
         interesting_checkpoint = os.path.join(CURRENT_DIR, '..', 'checkpoint', experiment_name, 'step-{}'.format(step))
-    dataset_manager = DatasetManager()
-    dataset_manager.boot()
 
     with tf.Graph().as_default() as gr:
         logging.info('-- Restoring graph for model: %s', interesting_checkpoint)
@@ -37,29 +50,33 @@ def predict_sample(experiment_name, step=''):
             saver.restore(sess=sess, save_path=interesting_checkpoint)
             logging.info('-- Restored variables for model named: %s', interesting_checkpoint)
 
-            docs, labels = dataset_manager.get_test_set(FLAGS.BATCH_SIZE)
             tf_input = gr.get_tensor_by_name('input/tf_input:0')
             tf_predictions = gr.get_tensor_by_name('prediction:0')
 
             prediction = sess.run(tf_predictions, feed_dict={
-                tf_input: docs
+                tf_input: list_vecs
             })
 
-            logging.info('-- Report for model: %s', experiment_name)
-            logging.info(classification_report(y_true=labels, y_pred=prediction))
-            sentences = dataset_manager.text2vec.vec_to_doc(docs)
-            pd.DataFrame({
-                'sentence': sentences,
-                'label': labels,
-                'predict': prediction
-            }).to_csv(FLAGS.OUTPUT, index=None)
-            logging.debug('Saved')
+            if len(list_labels) != 0:
+                logging.info('-- Report for model: %s', experiment_name)
+                logging.info(classification_report(y_true=list_labels, y_pred=prediction))
+
+            result_dict = dict()
+            result_dict['sentence'] = list_sentences
+            result_dict['pre-processed'] = list_preprocessed_sentences
+            result_dict['pre-processed_recover'] = dataset_manager.text2vec.vec_to_doc(list_preprocessed_sentences)
+            result_dict['predict'] = prediction
+
+            if len(list_labels) != 0:
+                result_dict['label'] = list_labels
+
+            pd.DataFrame(result_dict).to_csv(output_file, index=None)
+            logging.debug('Saved result at %s', output_file)
 
 
 def main(argv=None):
-    experiment_name = FLAGS.EXP_NAME
-    utils.logging_parameters(experiment_name)
-    predict_sample(experiment_name, step=FLAGS.STEP)
+    utils.logging_parameters(FLAGS.EXP_NAME)
+    predict_sample()
 
 
 if __name__ == '__main__':
