@@ -159,3 +159,4 @@ avg / total       0.82      0.82      0.82      9216
  [ 170  240 2398]]
 - I've though that the more parameters, the more capacity the network possesses. But it is not true. The v1's number of parameters has varied from 2mi to 8mi, the result was still around 0.79, but a simple LSTM can reach 0.82 for the very first try. Very imposing result !
 - Try with hidden=500
+- TODO research entity detection

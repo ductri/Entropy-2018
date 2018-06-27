@@ -52,12 +52,12 @@ def __fc(tensor_input, size, name=0):
 
         tf_bias = tf.get_variable(name='bias', shape=[size], dtype=DEFAULT_TYPE, initializer=ZERO_INITIALIZER())
         tf_output = tf.nn.bias_add(tf_output, tf_bias)
-
+        reg = tf.nn.l2_loss(tf_weights)
     assert tf_output.shape[1] == size, tf_output.shape[1]
-    return tf_output
+    return tf_output, reg
 
 
-def loss(tf_logits, batch_labels):
+def loss(tf_logits, batch_labels, tf_reg):
     """
 
     :param tf_logits: [X, number_classes]
@@ -68,9 +68,11 @@ def loss(tf_logits, batch_labels):
     assert tf_logits.shape[1] == 3
     tf_losses = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=batch_labels, logits=tf_logits)
     tf_aggregated_loss = tf.reduce_mean(tf_losses)
+    tf_losses_with_reg = tf_aggregated_loss + FLAGS.REG_RATE * tf_reg
 
     tf.summary.scalar(name='loss', tensor=tf_aggregated_loss)
-    return tf_aggregated_loss
+    tf.summary.scalar(name='loss_reg', tensor=tf_losses_with_reg)
+    return tf_losses_with_reg
 
 
 def optimize(tf_loss):
@@ -115,7 +117,8 @@ def inference(batch_sentences):
     with tf.variable_scope('LSTM'):
         lstm_cell = rnn.BasicLSTMCell(FLAGS.NUM_HIDDEN, forget_bias=1.0)
         outputs, states = rnn.static_rnn(cell=lstm_cell, inputs=word_embeddings, dtype=tf.float32)
-    tf_logits = __fc(tensor_input=outputs[-1], size=FLAGS.FC0_SIZE, name=0)
-    tf_logits = __fc(tensor_input=tf_logits, size=3, name=1)
-    return tf_logits
+    tf_logits, reg1 = __fc(tensor_input=outputs[-1], size=FLAGS.FC0_SIZE, name=0)
+    tf_logits, reg2 = __fc(tensor_input=tf_logits, size=3, name=1)
+    reg = reg1 + reg2
+    return tf_logits, reg
 
