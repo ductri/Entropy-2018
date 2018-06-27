@@ -57,7 +57,8 @@ elif FLAGS.MODEL_VERSION == 'v5':
     import model_v5 as model
 elif FLAGS.MODEL_VERSION == 'v6':
     import model_v6 as model
-
+elif FLAGS.MODEL_VERSION == 'v7':
+    import model_v6 as model
 
 def run(experiment_name):
     with tf.Graph().as_default() as gr:
