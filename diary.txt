@@ -163,4 +163,6 @@ avg / total       0.82      0.82      0.82      9216
 23:32 27-06-2018
 - Try with bi-rnn in model_v7
 - TODO run last run with reg
-
+- TODO add vlsp dataset to train
+20:16 28-06-2018
+- 

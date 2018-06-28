@@ -56,6 +56,8 @@ elif FLAGS.MODEL_VERSION == 'v5':
     import model_v5 as model
 elif FLAGS.MODEL_VERSION == 'v6':
     import model_v6 as model
+elif FLAGS.MODEL_VERSION == 'v8':
+    import model_v8 as model
 
 
 def run(experiment_name):
