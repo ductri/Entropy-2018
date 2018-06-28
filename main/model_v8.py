@@ -57,7 +57,7 @@ def __fc(tensor_input, size, name=0):
     return tf_output
 
 
-def loss(tf_logits, batch_labels, tf_reg):
+def loss(tf_logits, batch_labels):
     """
 
     :param tf_logits: [X, number_classes]
@@ -68,11 +68,9 @@ def loss(tf_logits, batch_labels, tf_reg):
     assert tf_logits.shape[1] == 3
     tf_losses = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=batch_labels, logits=tf_logits)
     tf_aggregated_loss = tf.reduce_mean(tf_losses)
-    tf_losses_with_reg = tf_aggregated_loss + FLAGS.REG_RATE * tf_reg
 
     tf.summary.scalar(name='loss', tensor=tf_aggregated_loss)
-    tf.summary.scalar(name='loss_reg', tensor=tf_losses_with_reg)
-    return tf_losses_with_reg
+    return tf_aggregated_loss
 
 
 def optimize(tf_loss):
@@ -115,16 +113,18 @@ def inference(batch_sentences):
     word_embeddings = tf.unstack(word_embeddings, SENTENCE_LENGTH_MAX, axis=1) # SENTENCE_LENGTH_MAX tensors which shape=[batch_size, embedding_size]
 
     with tf.variable_scope('LSTM'):
-        fw_lstm_cell = rnn.BasicLSTMCell(FLAGS.NUM_HIDDEN, forget_bias=1.0)
-        bw_lstm_cell = rnn.BasicLSTMCell(FLAGS.NUM_HIDDEN, forget_bias=1.0)
+        lstm_cell = rnn.BasicLSTMCell(FLAGS.NUM_HIDDEN, forget_bias=1.0)
 
-        outputs, _, _ = rnn.static_bidirectional_rnn(fw_lstm_cell, bw_lstm_cell, word_embeddings, dtype=tf.float32)
-    with tf.variable_scope('After LSTM'):
+        outputs, states = rnn.static_rnn(cell=lstm_cell, inputs=word_embeddings, dtype=tf.float32)
+    with tf.variable_scope('After_LSTM'):
         outputs = tf.stack(outputs)
+        print('outputs 1 ', outputs)
         outputs = tf.transpose(outputs, perm=[1, 0, 2])
-        outputs = tf.expand_dims(outputs)  # batch_size, sentence_length, hidden, 1
-        output = tf.nn.max_pool(outputs, ksize=[1, 3, FLAGS.NUM_HIDDEN, 1], strides=[1, 1, 1, 1], padding='VALID')
+        print('outputs 2 ', outputs)
+        outputs = tf.expand_dims(outputs, dim=3)  # batch_size, sentence_length, hidden, 1
 
+        output = tf.nn.max_pool(outputs, ksize=[1, 3, FLAGS.NUM_HIDDEN, 1], strides=[1, 1, 1, 1], padding='VALID')
+        output = tf.reshape(output, shape=[-1, output.shape[1] * output.shape[2] * output.shape[3]])
     tf_logits = __fc(tensor_input=output, size=FLAGS.FC0_SIZE, name=0)
     tf_logits = __fc(tensor_input=tf_logits, size=3, name=1)
     return tf_logits
