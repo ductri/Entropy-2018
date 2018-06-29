@@ -75,12 +75,14 @@ def run(experiment_name):
         tf_train_writer = tf.summary.FileWriter(logdir=os.path.join(CURRENT_DIR, '..', 'summary', 'train_' + experiment_name), graph=gr)
         tf_test_writer = tf.summary.FileWriter(logdir=os.path.join(CURRENT_DIR, '..', 'summary', 'test_' + experiment_name), graph=gr)
 
+        tf_embedding_writer = tf.summary.FileWriter(logdir=os.path.join(CURRENT_DIR, '..', 'checkpoint', experiment_name))
+
         # Visual word embedding
         config = projector.ProjectorConfig()
         embedding = config.embeddings.add()
         embedding.tensor_name = 'embedding/word_embeddings'  # Reference model_v6.py
         embedding.metadata_path = os.path.join(CURRENT_DIR, 'data', DatasetManager.VOCAB_FILE)
-        projector.visualize_embeddings(tf_train_writer, config)
+        projector.visualize_embeddings(tf_embedding_writer, config)
 
         saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=0.03)
 
