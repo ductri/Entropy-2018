@@ -125,6 +125,10 @@ class Text2Vector:
             raise Exception('counts is None')
         return self.counts.most_common(n)
 
+    def export_vocab(self, output_file):
+        pd.DataFrame({'word': self.int_to_vocab}).to_csv(output_file, index=False, header=False)
+        logging.debug('Exported %s words in vocab into file %s', len(self.int_to_vocab), output_file)
+
 
 def preprocess(list_docs):
     preprocessed_docs = clear_number(list_docs)

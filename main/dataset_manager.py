@@ -21,6 +21,7 @@ class DatasetManager:
     ENTROPY_DATASET = 'entropy_2018'
     BINARY_TRAINING_FILE = 'binary_training_data'
     BINARY_TEST_FILE = 'binary_test_data'
+    VOCAB_FILE = 'vocab.csv'
 
     LABEL_MAPPING = {
         'positive': 0,
@@ -118,6 +119,10 @@ class DatasetManager:
                            'int_to_vocab': self.text2vec.int_to_vocab,
                            'vocab_to_int': self.text2vec.vocab_to_int
                            }, output_file)
+
+        path_to_file = os.path.join(CURRENT_DIR, 'data', DatasetManager.VOCAB_FILE)
+        if not os.path.isfile(path_to_file):
+            self.text2vec.export_vocab(path_to_file)
 
     def __maybe_boot_test(self):
         path_to_file = os.path.join(CURRENT_DIR, 'data',  DatasetManager.BINARY_TEST_FILE)

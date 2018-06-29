@@ -1,5 +1,4 @@
 # Started at 11:30 19-06-2018
-import logging
 import tensorflow as tf
 from tensorflow.contrib import rnn
 

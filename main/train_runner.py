@@ -1,10 +1,8 @@
 import tensorflow as tf
-import numpy as np
 import os
-import time
 import logging.config
-from ruamel.yaml import YAML
 from datetime import datetime
+from tensorflow.contrib.tensorboard.plugins import projector
 
 
 from dataset_manager import DatasetManager
@@ -76,6 +74,13 @@ def run(experiment_name):
 
         tf_train_writer = tf.summary.FileWriter(logdir=os.path.join(CURRENT_DIR, '..', 'summary', 'train_' + experiment_name), graph=gr)
         tf_test_writer = tf.summary.FileWriter(logdir=os.path.join(CURRENT_DIR, '..', 'summary', 'test_' + experiment_name), graph=gr)
+
+        # Visual word embedding
+        config = projector.ProjectorConfig()
+        embedding = config.embeddings.add()
+        embedding.tensor_name = 'embedding/word_embeddings'  # Reference model_v6.py
+        embedding.metadata_path = os.path.join(CURRENT_DIR, 'data', DatasetManager.VOCAB_FILE)
+        projector.visualize_embeddings(tf_train_writer, config)
 
         saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=0.03)
 

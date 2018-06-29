@@ -165,4 +165,9 @@ avg / total       0.82      0.82      0.82      9216
 - TODO run last run with reg
 - TODO add vlsp dataset to train
 20:16 28-06-2018
-- 
+- Try with model v8, max pooling for the output of rnn
+- TODO anw, should try with pretrain embedding
+how to specify a word is very negative, or very positive ???
+- TODO replace a word in a sentence, to reasoning
+20:04 29-06-2018
+- Try with model_v6 to visual word embedding
