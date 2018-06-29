@@ -1,7 +1,7 @@
 #!/bin/bash
 
 python main/train_runner.py \
---MODEL_VERSION=v8 \
+--MODEL_VERSION=v6 \
 --ALL_DATASET=/all_dataset \
 --BATCH_SIZE=128 \
 --TEST_SIZE=1000 \
