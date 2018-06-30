@@ -171,3 +171,8 @@ how to specify a word is very negative, or very positive ???
 - TODO replace a word in a sentence, to reasoning
 20:04 29-06-2018
 - Try with model_v6 to visual word embedding
+/root/code/trind/entropy_2018/main/data
+18:54 30-06-2018
+- Do clearing rubbish 
++ Start with trying vietnamese tokenizer: preprocessing_vietnamese.py
+

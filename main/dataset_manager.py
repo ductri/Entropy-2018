@@ -8,7 +8,7 @@ from ruamel.yaml import YAML
 import tensorflow as tf
 
 # import preprocessor
-import preprocessor_padding as preprocessor
+import preprocessor_vietnamese as preprocessor
 import model_v1
 
 FLAGS = tf.flags.FLAGS
@@ -22,6 +22,8 @@ class DatasetManager:
     BINARY_TRAINING_FILE = 'binary_training_data'
     BINARY_TEST_FILE = 'binary_test_data'
     VOCAB_FILE = 'vocab.csv'
+    # ALL_DATASET = FLAGS.ALL_DATASET
+    ALL_DATASET = '/home/ductri/code/all_dataset'
 
     LABEL_MAPPING = {
         'positive': 0,
@@ -99,7 +101,8 @@ class DatasetManager:
 
         else:
             logging.info('Loading data ...')
-            df_train = pd.read_csv(os.path.join(FLAGS.ALL_DATASET, DatasetManager.ENTROPY_DATASET, 'training_set.csv'))
+            df_train = pd.read_csv(os.path.join(DatasetManager.ALL_DATASET, DatasetManager.ENTROPY_DATASET, 'training_set.csv'))
+            # df_train = df_train.iloc[:10000, :]
             logging.info('Pre-processing training data ...')
             train_list_docs = preprocessor.preprocess(list(df_train['sentence']))
 
@@ -134,7 +137,8 @@ class DatasetManager:
                 self.test_y = np.array(data['y'])
         else:
             logging.info('Loading data ...')
-            df_test = pd.read_csv(os.path.join(FLAGS.ALL_DATASET, DatasetManager.ENTROPY_DATASET, 'test_set.csv'))
+            df_test = pd.read_csv(os.path.join(DatasetManager.ALL_DATASET, DatasetManager.ENTROPY_DATASET, 'test_set.csv'))
+            # df_test = df_test.iloc[:10000, :]
             logging.info('Pre-processing test data ...')
             test_list_docs = preprocessor.preprocess(list(df_test['sentence']))
 
@@ -161,20 +165,20 @@ if __name__ == '__main__':
     dataset_manager = DatasetManager()
     dataset_manager.boot()
 
-    print('Test')
-
-    for i in range(10):
-        index = np.random.randint(dataset_manager.train_X.shape[0])
-        print('*' * 30)
-        print('Sentence: ', dataset_manager.text2vec.vec_to_doc([dataset_manager.train_X[index]]))
-        print('Sentiment: ', dataset_manager.train_y[index])
-
-    print('*' * 100)
-    print('*' * 100)
-    for docs, sentiments in dataset_manager.get_batch(batch_size=10, number_epochs=1):
-        print(dataset_manager.text2vec.vec_to_doc(docs))
-        break
-
-    print('*' * 100)
-    print('*' * 100)
-    print('Vocab size: ', dataset_manager.get_vocab_size())
+    # print('Test')
+    #
+    # for i in range(10):
+    #     index = np.random.randint(dataset_manager.train_X.shape[0])
+    #     print('*' * 30)
+    #     print('Sentence: ', dataset_manager.text2vec.vec_to_doc([dataset_manager.train_X[index]]))
+    #     print('Sentiment: ', dataset_manager.train_y[index])
+    #
+    # print('*' * 100)
+    # print('*' * 100)
+    # for docs, sentiments in dataset_manager.get_batch(batch_size=10, number_epochs=1):
+    #     print(dataset_manager.text2vec.vec_to_doc(docs))
+    #     break
+    #
+    # print('*' * 100)
+    # print('*' * 100)
+    # print('Vocab size: ', dataset_manager.get_vocab_size())
