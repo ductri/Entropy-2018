@@ -46,6 +46,8 @@ class Text2Vector:
         """
         if index != -1:
             logging.debug('Tokenize count: %s', index)
+        if index >= 23729:
+            logging.debug('Fucking text: %s', text)
         return ViTokenizer.tokenize(text).split(' ')
 
     def doc_to_vec(self, list_documents):
@@ -70,7 +72,7 @@ class Text2Vector:
         if self.counts or self.vocab_to_int or self.int_to_vocab:
             raise Exception('"fit" is a one-time function')
         logging.debug('Tokenizing %s documents', len(list_texts))
-        list_tokenized_texts = Parallel(n_jobs=4)(delayed(self.tokenize)(doc, index) for index, doc in enumerate(list_texts))
+        list_tokenized_texts = Parallel(n_jobs=1)(delayed(self.tokenize)(doc, index) for index, doc in enumerate(list_texts))
         logging.debug('Tokenize done')
         all_tokens = itertools.chain(*list_tokenized_texts)
         self.counts = collections.Counter(all_tokens)
