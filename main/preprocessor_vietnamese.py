@@ -57,8 +57,8 @@ class Text2Vector:
         #     if i % 100 == 0:
         #         logging.debug('--- Tokenizing: {}\{}, len={}'.format(i, len_list, len(doc)))
         #     tokenized_documents.append(self.__tokenize(doc))
-        tokenized_documents = Parallel(n_jobs=-1)(delayed(self.tokenize)(doc, index) for index, doc in enumerate(list_documents))
-        transformed_documents = Parallel(n_jobs=-1)(delayed(self.transform)(doc) for doc in tokenized_documents)
+        tokenized_documents = Parallel(n_jobs=1)(delayed(self.tokenize)(doc, index) for index, doc in enumerate(list_documents))
+        transformed_documents = Parallel(n_jobs=1)(delayed(self.transform)(doc) for doc in tokenized_documents)
         return transformed_documents
 
     def vec_to_doc(self, list_vecs):
@@ -70,7 +70,7 @@ class Text2Vector:
         if self.counts or self.vocab_to_int or self.int_to_vocab:
             raise Exception('"fit" is a one-time function')
         logging.debug('Tokenizing %s documents', len(list_texts))
-        list_tokenized_texts = Parallel(n_jobs=-1)(delayed(self.tokenize)(doc, index) for index, doc in enumerate(list_texts))
+        list_tokenized_texts = Parallel(n_jobs=4)(delayed(self.tokenize)(doc, index) for index, doc in enumerate(list_texts))
         logging.debug('Tokenize done')
         all_tokens = itertools.chain(*list_tokenized_texts)
         self.counts = collections.Counter(all_tokens)
