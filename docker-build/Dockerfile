@@ -8,6 +8,7 @@ RUN apt-get -y install python3-tk
 RUN pip install ruamel.yaml
 RUN pip install nltk
 RUN pip install pyvi
+RUN pip install joblib
 
 VOLUME /source/
 VOLUME /all_dataset/

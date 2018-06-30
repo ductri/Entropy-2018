@@ -22,8 +22,8 @@ class DatasetManager:
     BINARY_TRAINING_FILE = 'binary_training_data'
     BINARY_TEST_FILE = 'binary_test_data'
     VOCAB_FILE = 'vocab.csv'
-    # ALL_DATASET = FLAGS.ALL_DATASET
-    ALL_DATASET = '/home/ductri/code/all_dataset'
+    ALL_DATASET = FLAGS.ALL_DATASET
+    # ALL_DATASET = '/home/ductri/code/all_dataset'
 
     LABEL_MAPPING = {
         'positive': 0,
