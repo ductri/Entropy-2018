@@ -69,11 +69,12 @@ class Text2Vector:
         logging.debug('-- From fit')
         if self.counts or self.vocab_to_int or self.int_to_vocab:
             raise Exception('"fit" is a one-time function')
-
-        list_tokenized_texts = [self.tokenize(text) for text in list_texts]
+        logging.debug('Tokenizing %s documents', len(list_texts))
+        list_tokenized_texts = Parallel(n_jobs=-1)(delayed(self.tokenize)(doc, index) for index, doc in enumerate(list_texts))
+        logging.debug('Tokenize done')
         all_tokens = itertools.chain(*list_tokenized_texts)
         self.counts = collections.Counter(all_tokens)
-
+        logging.debug('Count done')
         self.int_to_vocab = self.__get_vocab()
         self.int_to_vocab = [Text2Vector.PADDING] + self.int_to_vocab + [Text2Vector.OUT_OF_VOCAB]
         self.vocab_to_int = {word: index for index, word in enumerate(self.int_to_vocab)}
