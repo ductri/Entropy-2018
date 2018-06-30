@@ -48,7 +48,9 @@ class Text2Vector:
             logging.debug('Tokenize count: %s', index)
         if index == 23730:
             logging.debug('Fucking text: %s', text)
-        return ViTokenizer.tokenize(text).split(' ')
+        result = ViTokenizer.tokenize(text).split(' ')
+
+        return result
 
     def doc_to_vec(self, list_documents):
         logging.debug('-- From doc_to_vec')

@@ -109,3 +109,4 @@ venv.bak/
 summary/
 main/data/
 checkpoint/
+logs/
