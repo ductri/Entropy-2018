@@ -22,7 +22,7 @@ class DatasetManager:
     BINARY_TRAINING_FILE = 'binary_training_data'
     BINARY_TEST_FILE = 'binary_test_data'
     VOCAB_FILE = 'vocab.csv'
-    ALL_DATASET = FLAGS.ALL_DATASET
+
     # ALL_DATASET = '/home/ductri/code/all_dataset'
 
     LABEL_MAPPING = {
@@ -37,6 +37,7 @@ class DatasetManager:
         self.test_X = None
         self.test_y = None
         self.text2vec = preprocessor.Text2Vector()
+        self.ALL_DATASET = FLAGS.ALL_DATASET
 
     def boot(self):
         self.__maybe_boot_train()
@@ -101,7 +102,7 @@ class DatasetManager:
 
         else:
             logging.info('Loading data ...')
-            df_train = pd.read_csv(os.path.join(DatasetManager.ALL_DATASET, DatasetManager.ENTROPY_DATASET, 'training_set.csv'))
+            df_train = pd.read_csv(os.path.join(self.ALL_DATASET, DatasetManager.ENTROPY_DATASET, 'training_set.csv'))
             # df_train = df_train.iloc[:10000, :]
             logging.info('Pre-processing training data ...')
             train_list_docs = preprocessor.preprocess(list(df_train['sentence']))
@@ -137,7 +138,7 @@ class DatasetManager:
                 self.test_y = np.array(data['y'])
         else:
             logging.info('Loading data ...')
-            df_test = pd.read_csv(os.path.join(DatasetManager.ALL_DATASET, DatasetManager.ENTROPY_DATASET, 'test_set.csv'))
+            df_test = pd.read_csv(os.path.join(self.ALL_DATASET, DatasetManager.ENTROPY_DATASET, 'test_set.csv'))
             # df_test = df_test.iloc[:10000, :]
             logging.info('Pre-processing test data ...')
             test_list_docs = preprocessor.preprocess(list(df_test['sentence']))
