@@ -46,7 +46,7 @@ class Text2Vector:
         """
         if index != -1:
             logging.debug('Tokenize count: %s', index)
-        if index >= 23729:
+        if index == 23730:
             logging.debug('Fucking text: %s', text)
         return ViTokenizer.tokenize(text).split(' ')
 
@@ -117,6 +117,7 @@ def preprocess(list_docs):
     preprocessed_docs = clear_number(list_docs)
     preprocessed_docs = replace_url(preprocessed_docs)
     preprocessed_docs = [doc.lower() for doc in preprocessed_docs]
+    preprocessed_docs = [re.sub('[^\w\s]', '', doc) for doc in preprocessed_docs]
     return preprocessed_docs
 
 

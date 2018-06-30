@@ -175,4 +175,6 @@ how to specify a word is very negative, or very positive ???
 18:54 30-06-2018
 - Do clearing rubbish 
 + Start with trying vietnamese tokenizer: preprocessing_vietnamese.py
++ pyvi has a bug with '*******************************************************888 -------------------------------------------------------------------'
++ try preprocessing removing all special characters
 
