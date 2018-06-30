@@ -91,7 +91,6 @@ class Text2Vector:
 
         self.pretrained_vectors = Embedding.load_pretrained_vectors(FLAGS.WORD_EMBEDDING_FILE)
         self.__load_vocab()
-        self.int_to_vocab = [Text2Vector.PADDING] + self.int_to_vocab + [Text2Vector.OUT_OF_VOCAB]
         self.vocab_to_int = {word: index for index, word in enumerate(self.int_to_vocab)}
 
     def __load_vocab(self):
@@ -123,9 +122,6 @@ class Text2Vector:
         if not self.counts:
             raise Exception('counts is None')
         return self.counts.most_common(n)
-
-
-
 
 
 def preprocess(list_docs):

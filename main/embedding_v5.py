@@ -1,4 +1,5 @@
 import io
+import numpy as np
 import logging
 
 
@@ -14,8 +15,9 @@ class Embedding:
             Embedding.__word_embedding = {}
             for line in fin:
                 tokens = line.rstrip().split(' ')
-                Embedding.__word_embedding[tokens[0]] = [float(token) for token in tokens[1:]]
-
+                Embedding.__word_embedding[tokens[0]] = np.array([float(token) for token in tokens[1:]])
+            Embedding.__word_embedding['OUT_OF_VOCAB'] = np.zeros(300)
+            Embedding.__word_embedding['PADDING'] = np.zeros(300)
         logging.debug('--  Pre-trained word embeeding has been loaded')
         logging.info('-- Pre-trained word vocab size: %s', len(Embedding.__word_embedding))
         return Embedding.__word_embedding
