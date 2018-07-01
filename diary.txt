@@ -211,4 +211,5 @@ avg / total     0.8216    0.8205    0.8209      9216
 [[2291  474  111]
  [ 474 2862  196]
  [ 186  213 2409]]
- 
+ - Next, we try to tune hyperparameter, start with regularization scale
++ First of all, reproduce with no reg

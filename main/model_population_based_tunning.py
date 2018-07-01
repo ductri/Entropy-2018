@@ -1,7 +1,9 @@
 # Started at 11:30 19-06-2018
 import tensorflow as tf
 from tensorflow.contrib import rnn
+import tensorflow.contrib as tfc
 import logging
+import numpy as np
 
 
 VOCAB_SIZE = 10002
@@ -21,29 +23,31 @@ def ZERO_INITIALIZER():
 
 
 class Model:
-    def __init__(self, model_id: int):
+    def __init__(self, model_id: int, is_included_regularization: bool):
+        self.is_included_regularization = is_included_regularization
         self.model_id = model_id
+        self.l1_scale = tf.get_variable(name='l1_scale', shape=[], dtype=tf.float32, trainable=False,
+                                        initializer=tf.constant_initializer(np.log2(1e-5)))
+        self.l1_scale_perturb_op = self.__get_l1_scale_perturb_op()
+        self.scope_name = tf.get_default_graph().get_name_scope()
 
-    def __project_words(self, batch_sentences):
+    def inference(self, batch_sentences):
         """
 
         :param batch_sentences: [batch_size, sentence_length_max]
-        :return: [batch_size, sentence_length_max, embedding_size]
+        :return:
         """
-        assert len(batch_sentences.shape) == 2
-        assert batch_sentences.shape[1] == SENTENCE_LENGTH_MAX
+        word_embeddings = self.__project_words(batch_sentences)
+        word_embeddings = tf.unstack(word_embeddings, SENTENCE_LENGTH_MAX, axis=1) # SENTENCE_LENGTH_MAX tensors which shape=[batch_size, embedding_size]
 
-        with tf.device('/cpu:0'), tf.variable_scope('embedding'):
-            word_embeddings = tf.get_variable(name='word_embeddings', dtype=DEFAULT_TYPE, shape=[VOCAB_SIZE, FLAGS.EMBEDDING_SIZE],
-                                              initializer=DEFAULT_INITIALIZER())
-            projected_words = tf.nn.embedding_lookup(params=word_embeddings, ids=batch_sentences)
+        with tf.variable_scope('LSTM'):
+            lstm_cell = rnn.BasicLSTMCell(FLAGS.NUM_HIDDEN, forget_bias=1.0)
+            outputs, states = rnn.static_rnn(cell=lstm_cell, inputs=word_embeddings, dtype=tf.float32)
+        l1_reg = self.__get_regularizer() if self.is_included_regularization else None
+        tf_logits = tf.layers.dense(outputs[-1], units=FLAGS.FC0_SIZE, activation=tf.nn.relu, kernel_regularizer=l1_reg)
+        tf_logits = tf.layers.dense(tf_logits, units=3, kernel_regularizer=l1_reg)
 
-        assert len(projected_words.shape) == 3
-
-        assert projected_words.shape[1] == SENTENCE_LENGTH_MAX
-        assert projected_words.shape[2] == FLAGS.EMBEDDING_SIZE
-
-        return projected_words
+        return tf_logits
 
     def loss(self, tf_logits, batch_labels):
         """
@@ -55,7 +59,7 @@ class Model:
         assert len(tf_logits.shape) == 2, len(tf_logits.shape)
         assert tf_logits.shape[1] == 3
         tf_losses = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=batch_labels, logits=tf_logits)
-        tf_aggregated_loss = tf.reduce_mean(tf_losses)
+        tf_aggregated_loss = tf.reduce_mean(tf_losses) + tf.losses.get_regularization_loss()
 
         tf.summary.scalar(name='loss', tensor=tf_aggregated_loss)
         return tf_aggregated_loss
@@ -63,19 +67,8 @@ class Model:
     def optimize(self, tf_loss):
         tf_global_step = tf.get_variable(name='global_step', dtype=tf.int32, shape=(), initializer=ZERO_INITIALIZER())
 
-        opt = tf.train.GradientDescentOptimizer(learning_rate=FLAGS.LEARNING_RATE)
-        grads = opt.compute_gradients(tf_loss)
+        apply_gradient_op = tf.train.GradientDescentOptimizer(learning_rate=FLAGS.LEARNING_RATE).minimize(tf_loss, global_step=tf_global_step)
 
-        with tf.variable_scope('optimize'):
-            # Add histograms for gradients.
-            for grad, var in grads:
-                if grad is not None:
-                    tf.summary.histogram(var.op.name + '/gradients', grad)
-                    tf.summary.scalar(var.op.name + '/gradients', tf.nn.l2_loss(grad))
-                else:
-                    logging.warning('Grad is None')
-
-        apply_gradient_op = opt.apply_gradients(grads, global_step=tf_global_step)
         return apply_gradient_op, tf_global_step
 
     def predict(self, tf_logits):
@@ -86,7 +79,6 @@ class Model:
         """
         tf_predicts = tf.argmax(tf_logits, axis=1, output_type=tf.int32, name='prediction')
         return tf_predicts
-
 
     def measure_acc(self, tf_logits, batch_labels):
         """
@@ -100,20 +92,40 @@ class Model:
         tf.summary.scalar(name='accuracy', tensor=tf_acc)
         return tf_acc
 
+    def get_copy_from_op(self, other_model):
+        my_weights = tf.get_collection(key=tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.scope_name)
+        their_weights = tf.get_collection(key=tf.GraphKeys.TRAINABLE_VARIABLES, scope=other_model.scope_name)
+        assign_ops = [mine.assign(theirs).op for mine, theirs in zip(my_weights, their_weights)]
+        return assign_ops
 
-    def inference(self, batch_sentences):
+    def __get_regularizer(self):
+        return tfc.layers.l1_regularizer(2 ** self.l1_scale)
+
+    def __project_words(self, batch_sentences):
         """
 
         :param batch_sentences: [batch_size, sentence_length_max]
-        :return:
+        :return: [batch_size, sentence_length_max, embedding_size]
         """
-        word_embeddings = __project_words(batch_sentences)
-        word_embeddings = tf.unstack(word_embeddings, SENTENCE_LENGTH_MAX, axis=1) # SENTENCE_LENGTH_MAX tensors which shape=[batch_size, embedding_size]
+        assert len(batch_sentences.shape) == 2
+        assert batch_sentences.shape[1] == SENTENCE_LENGTH_MAX
 
-        with tf.variable_scope('LSTM'):
-            lstm_cell = rnn.BasicLSTMCell(FLAGS.NUM_HIDDEN, forget_bias=1.0)
-            outputs, states = rnn.static_rnn(cell=lstm_cell, inputs=word_embeddings, dtype=tf.float32)
-        tf_logits = __fc(tensor_input=outputs[-1], size=FLAGS.FC0_SIZE, name=0)
-        tf_logits = __fc(tensor_input=tf_logits, size=3, name=1)
-        return tf_logits
+        with tf.device('/cpu:0'), tf.variable_scope('embedding'):
+            word_embeddings = tf.get_variable(name='word_embeddings', dtype=DEFAULT_TYPE,
+                                              shape=[VOCAB_SIZE, FLAGS.EMBEDDING_SIZE],
+                                              initializer=DEFAULT_INITIALIZER())
+            projected_words = tf.nn.embedding_lookup(params=word_embeddings, ids=batch_sentences)
+
+        assert len(projected_words.shape) == 3
+
+        assert projected_words.shape[1] == SENTENCE_LENGTH_MAX
+        assert projected_words.shape[2] == FLAGS.EMBEDDING_SIZE
+
+        return projected_words
+
+    def __get_l1_scale_perturb_op(self):
+        noise = tf.random_normal([], stddev=0.5)
+        return self.l1_scale.assign_add(noise)
+
+
 
