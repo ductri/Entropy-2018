@@ -48,7 +48,7 @@ def evaluate(experiment_name, step=''):
                 list_labels.extend(labels)
                 logging.debug('-- Prediction length: %s/%s', len(list_predictions), dataset_manager.test_y.shape[0])
             logging.info('-- Report for model: %s', experiment_name)
-            logging.info(classification_report(y_true=list_labels, y_pred=list_predictions))
+            logging.info(classification_report(y_true=list_labels, y_pred=list_predictions, digits=4))
             logging.info(confusion_matrix(y_true=list_labels, y_pred=list_predictions))
 
 
