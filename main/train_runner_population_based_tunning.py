@@ -120,8 +120,8 @@ def create_model(*args, **kwargs):
 
 def main(argv=None):
     model = create_model(0, is_included_regularization=FLAGS.IS_INCLUDED_REGULARIZATION)
-
     experiment_name = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S')
+    logging.info('Tunning with name: %s', experiment_name)
     utils.logging_parameters(experiment_name)
     run(experiment_name, model)
 
