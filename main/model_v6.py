@@ -1,6 +1,7 @@
 # Started at 11:30 19-06-2018
 import tensorflow as tf
 from tensorflow.contrib import rnn
+import logging
 
 
 VOCAB_SIZE = 10002
@@ -77,12 +78,14 @@ def optimize(tf_loss):
     opt = tf.train.GradientDescentOptimizer(learning_rate=FLAGS.LEARNING_RATE)
     grads = opt.compute_gradients(tf_loss)
 
-
     with tf.variable_scope('optimize'):
         # Add histograms for gradients.
         for grad, var in grads:
             if grad is not None:
                 tf.summary.histogram(var.op.name + '/gradients', grad)
+                tf.summary.scalar(var.op.name + '/gradients', tf.nn.l2_loss(grad))
+            else:
+                logging.warning('Grad is None')
 
     apply_gradient_op = opt.apply_gradients(grads, global_step=tf_global_step)
     return apply_gradient_op, tf_global_step
