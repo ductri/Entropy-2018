@@ -4,7 +4,7 @@ python main/train_runner.py \
 --MODEL_VERSION=v6 \
 --ALL_DATASET=/all_dataset \
 --BATCH_SIZE=128 \
---TEST_SIZE=5000 \
+--TEST_SIZE=1000 \
 --NUMBER_EPOCHS=200 \
 --EMBEDDING_SIZE=200 \
 --CONV0_DROPOUT=0.3 \
