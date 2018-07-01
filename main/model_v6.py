@@ -76,7 +76,7 @@ def optimize(tf_loss):
 
     opt = tf.train.GradientDescentOptimizer(learning_rate=FLAGS.LEARNING_RATE)
     grads = opt.compute_gradients(tf_loss)
-    apply_gradient_op = opt.apply_gradients(grads, global_step=tf_global_step)
+
 
     with tf.variable_scope('optimize'):
         # Add histograms for gradients.
@@ -84,6 +84,7 @@ def optimize(tf_loss):
             if grad is not None:
                 tf.summary.histogram(var.op.name + '/gradients', grad)
 
+    apply_gradient_op = opt.apply_gradients(grads, global_step=tf_global_step)
     return apply_gradient_op, tf_global_step
 
 
