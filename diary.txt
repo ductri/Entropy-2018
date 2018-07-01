@@ -177,4 +177,23 @@ how to specify a word is very negative, or very positive ???
 + Start with trying vietnamese tokenizer: preprocessing_vietnamese.py
 + pyvi has a bug with '*******************************************************888 -------------------------------------------------------------------'
 + try preprocessing removing all special characters
++ Closest to "dien_thoai" at step 5k8:
+ngang_nhiên
+1.023
+fiber
+1.027
+gió
+1.030
+nạo_vét
+1.077
+triêu
+1.084
+đa_dạng
+1.095
+khoan
+1.109
+lầm
+1.111
+bán_triệu
+1.133
 

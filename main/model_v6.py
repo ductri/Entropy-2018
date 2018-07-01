@@ -74,8 +74,17 @@ def loss(tf_logits, batch_labels):
 def optimize(tf_loss):
     tf_global_step = tf.get_variable(name='global_step', dtype=tf.int32, shape=(), initializer=ZERO_INITIALIZER())
 
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate=FLAGS.LEARNING_RATE).minimize(tf_loss, global_step=tf_global_step)
-    return optimizer, tf_global_step
+    opt = tf.train.GradientDescentOptimizer(learning_rate=FLAGS.LEARNING_RATE)
+    grads = opt.compute_gradients(tf_loss)
+    apply_gradient_op = opt.apply_gradients(grads, global_step=tf_global_step)
+
+    with tf.variable_scope('optimize'):
+        # Add histograms for gradients.
+        for grad, var in grads:
+            if grad is not None:
+                tf.summary.histogram(var.op.name + '/gradients', grad)
+
+    return apply_gradient_op, tf_global_step
 
 
 def predict(tf_logits):
