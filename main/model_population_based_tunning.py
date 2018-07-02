@@ -30,6 +30,9 @@ class Model:
                                         initializer=tf.constant_initializer(np.log2(1e-5)))
         self.l1_scale_perturb_op = self.__get_l1_scale_perturb_op()
         self.scope_name = tf.get_default_graph().get_name_scope()
+        self.tf_optimizer = None
+        self.tf_global_step = tf.get_variable(name='global_step', dtype=tf.int32, shape=(), initializer=ZERO_INITIALIZER())
+        self.tf_acc = None
 
     def inference(self, batch_sentences):
         """
@@ -65,11 +68,9 @@ class Model:
         return tf_aggregated_loss
 
     def optimize(self, tf_loss):
-        tf_global_step = tf.get_variable(name='global_step', dtype=tf.int32, shape=(), initializer=ZERO_INITIALIZER())
+        apply_gradient_op = tf.train.GradientDescentOptimizer(learning_rate=FLAGS.LEARNING_RATE).minimize(tf_loss, global_step=self.tf_global_step)
 
-        apply_gradient_op = tf.train.GradientDescentOptimizer(learning_rate=FLAGS.LEARNING_RATE).minimize(tf_loss, global_step=tf_global_step)
-
-        return apply_gradient_op, tf_global_step
+        return apply_gradient_op
 
     def predict(self, tf_logits):
         """
@@ -127,5 +128,11 @@ class Model:
         noise = tf.random_normal([], stddev=0.5)
         return self.l1_scale.assign_add(noise)
 
+    def boot(self, tf_input, tf_labels):
+        tf_logits = self.inference(tf_input)
+        tf_loss = self.loss(tf_logits, tf_labels)
+
+        self.tf_optimizer = self.optimize(tf_loss)
+        self.tf_acc = self.measure_acc(tf_logits, tf_labels)
 
 
