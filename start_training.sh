@@ -1,7 +1,7 @@
 #!/bin/bash
 
 python main/train_runner.py \
---MODEL_VERSION=v6 \
+--MODEL_VERSION=v9 \
 --ALL_DATASET=/all_dataset \
 --BATCH_SIZE=128 \
 --TEST_SIZE=1000 \
@@ -20,4 +20,6 @@ python main/train_runner.py \
 --FC1_DROPOUT=0.3 \
 --NUM_HIDDEN=100 \
 --LEARNING_RATE=0.05 \
---GPU=0.7
+--GPU=0.7 \
+--L1_SCALE=0.001
+

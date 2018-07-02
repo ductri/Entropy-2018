@@ -38,6 +38,7 @@ tf.flags.DEFINE_float('FC1_DROPOUT', 0.3, 'dropout rate in FC 1')
 tf.flags.DEFINE_integer('NUM_HIDDEN', 100, 'size of LSTM cell')
 
 tf.flags.DEFINE_float('LEARNING_RATE', 0.001, 'learning rate')
+tf.flags.DEFINE_float('L1_SCALE', 0.001, 'l1 scale')
 
 tf.flags.DEFINE_boolean('LOG_DEVICE_PLACEMENT', False, 'display which devices are using')
 tf.flags.DEFINE_float('GPU', 0.5, 'size of LSTM cell')
@@ -56,6 +57,8 @@ elif FLAGS.MODEL_VERSION == 'v6':
     import model_v6 as model
 elif FLAGS.MODEL_VERSION == 'v8':
     import model_v8 as model
+elif FLAGS.MODEL_VERSION == 'v9':
+    import model_v9 as model
 
 
 def run(experiment_name):

@@ -213,3 +213,6 @@ avg / total     0.8216    0.8205    0.8209      9216
  [ 186  213 2409]]
  - Next, we try to tune hyperparameter, start with regularization scale
 + First of all, reproduce with no reg
+02:08 03/06/2018
+Last try, try with reg rate = 0.001, 0.01, 0.05, 0.1 as v9
+
