@@ -7,8 +7,7 @@ import logging.config
 from ruamel.yaml import YAML
 import tensorflow as tf
 
-# import preprocessor
-import preprocessor_vietnamese as preprocessor
+import preprocessor
 import model_v1
 
 FLAGS = tf.flags.FLAGS
@@ -30,6 +29,7 @@ class DatasetManager:
         'neutral': 1,
         'negative': 2
     }
+    LABEL_UNMAPPING = ['positive', 'neutral', 'negative']
 
     def __init__(self):
         self.train_X = None
