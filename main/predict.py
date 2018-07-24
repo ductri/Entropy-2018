@@ -32,7 +32,9 @@ def predict(list_docs, experiment_name, step='', batch_size=64):
     dataset_manager.boot()
 
     list_preprocessed_sentences = preprocessor.preprocess(list_docs)
+
     list_vecs = dataset_manager.text2vec.doc_to_vec(list_preprocessed_sentences)
+    print(dataset_manager.text2vec.vec_to_doc(list_vecs))
     list_vecs = dataset_manager.equalize_vector_length_to_np(list_vectors=list_vecs,
                                                              max_length=model_v6.SENTENCE_LENGTH_MAX)
 

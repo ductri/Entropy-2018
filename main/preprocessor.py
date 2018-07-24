@@ -55,6 +55,7 @@ def get_most_popular_hashtag(n=10):
 class Text2Vector:
     OUT_OF_VOCAB = 'PADDING'
     PADDING = 'PADDING'
+    MY_KEY = 'MY_KEY'
 
     def __init__(self):
         self.counts = None
