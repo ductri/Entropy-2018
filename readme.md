@@ -12,4 +12,4 @@ RUN pip install joblib
 
 - Result will be stored as `output/output.csv`
 
-
+[Diary](https://github.com/ductri/Entropy-2018/blob/master/diary.txt)
